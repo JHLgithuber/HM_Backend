@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Socket.IO Communication</title>
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var socket = io();
+
+            // 메시지 보내기 이벤트 처리
+            document.getElementById('sendButton').onclick = function() {
+                var text = document.getElementById('messageInput').value;
+                var message = { text: text, user: { _id: '12345' }};
+                socket.emit('send_message', message);
+                document.getElementById('messageInput').value = '';
+            };
+
+            // 퍼블릭 키 요청 보내기
+            document.getElementById('requestKeyButton').onclick = function() {
+                var request = { user: { _id: '12345' }};
+                socket.emit('request_public_key', request);
+            };
+
+            // 퍼블릭 키 응답 받기
+            document.getElementById('respondKeyButton').onclick = function() {
+                var publicKey = { key: 'examplePublicKey', user: { _id: '12345' }};
+                socket.emit('response_public_key', publicKey);
+            };
+
+            // 메시지 수신 이벤트 처리
+            socket.on('receive_message', function(msg) {
+                var node = document.createElement("LI");
+                var textnode = document.createTextNode('Received: ' + JSON.stringify(msg));
+                node.appendChild(textnode);
+                document.getElementById('messages').appendChild(node);
+            });
+
+            // 퍼블릭 키 요청 수신 처리
+            socket.on('receive_request_public_key', function(data) {
+                var node = document.createElement("LI");
+                var textnode = document.createTextNode('Key Request: ' + JSON.stringify(data));
+                node.appendChild(textnode);
+                document.getElementById('messages').appendChild(node);
+            });
+
+            // 퍼블릭 키 응답 수신 처리
+            socket.on('receive_response_public_key', function(data) {
+                var node = document.createElement("LI");
+                var textnode = document.createTextNode('Key Response: ' + JSON.stringify(data));
+                node.appendChild(textnode);
+                document.getElementById('messages').appendChild(node);
+            });
+        });
+    </script>
+</head>
+<body>
+    <h1>Socket.IO Communication</h1>
+    <input type="text" id="messageInput" placeholder="Enter your message">
+    <button id="sendButton">Send Message</button>
+    <button id="requestKeyButton">Request Public Key</button>
+    <button id="respondKeyButton">Respond with Public Key</button>
+    <ul id="messages"></ul>
+</body>
+</html>
