@@ -9,3 +9,4 @@ venv
 myenv_of_HM
 HM_Backend_VSCode_workspace.code-workspace
 .gitignore
+Sample_Client

@@ -15,6 +15,15 @@ def index():
 def show_logs():
     return jsonify(logs)
 
+@socketio.on('login')
+def handle_message(data):
+    app.logger.info(f"Trying Login: {data}")
+
+    #로그인 회원 확인
+    message=True
+
+    socketio.emit('receive_message', message)
+    app.logger.info(f"Sendied message: {message}")
 
 @socketio.on('send_message')
 def handle_message(message):
