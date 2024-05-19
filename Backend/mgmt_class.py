@@ -1,5 +1,6 @@
 class mgmt:
     def __init__(self,id,CURD,entity,data):
+        self.id=id
         if CURD=='read':
             pass
         elif CURD=='create':

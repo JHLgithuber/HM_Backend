@@ -7,7 +7,7 @@ import os
 import logging
 import json
 
-import mgmt_class
+import Backend.mgmt_class as mgmt_class
 
 class Connect_to_Frontend:
     def __init__(self, security):
@@ -84,7 +84,7 @@ class Connect_to_Frontend:
         def protected():
             current_user = get_jwt_identity()
             return jsonify(logged_in_as=current_user), 200
-
+        
         @self.app.route('/refresh', methods=['GET'])
         @jwt_required(refresh=True)
         def refresh():
@@ -102,7 +102,7 @@ class Connect_to_Frontend:
             user_id = message.get('user').get('_id')
             name_of_data=message.get('name_of_data')
 
-            response_data=mgmt_class.mgmt(user_id,'read',name_of_data,None)
+            response_data=mgmt_class(user_id,'read',name_of_data,None)
 
             log_entry = {
                 'SID': sid,
@@ -113,7 +113,7 @@ class Connect_to_Frontend:
             }
 
             self.showing_logs.append(log_entry)  # 로그 저장
-            self.socketio.emit('requested_data', response_data, to=sid)
+            self.socketio.emit('responsed_data', response_data, to=sid)
             self.socketio.emit('receive_message', log_entry)
             self.app.logger.info(f"Sent message: {message} to {sid}")
         
@@ -126,7 +126,7 @@ class Connect_to_Frontend:
             name_of_data=message.get('name_of_data')
             data=message.get('data')
 
-            response_data=mgmt_class.mgmt(user_id,'update',name_of_data,data)
+            response_data=mgmt_class(user_id,'update',name_of_data,data)
 
             log_entry = {
                 'SID': sid,
@@ -138,12 +138,12 @@ class Connect_to_Frontend:
             }
 
             self.showing_logs.append(log_entry)  # 로그 저장
-            self.socketio.emit('requested_data', response_data, to=sid)
+            self.socketio.emit('responsed_data', response_data, to=sid)
             self.socketio.emit('receive_message', log_entry)
             self.app.logger.info(f"Sent message: {message} to {sid}")
             
         @self.socketio.on('create_data')
-        def handle_update_data(message):
+        def handle_create_data(message):
             sid=request.sid
             self.app.logger.info(f"Received message: {message}")
 
@@ -151,7 +151,7 @@ class Connect_to_Frontend:
             name_of_data=message.get('name_of_data')
             data=message.get('data')
 
-            response_data=mgmt_class.mgmt(user_id,'update',name_of_data,data)
+            response_data=mgmt_class(user_id,'update',name_of_data,data)
 
             log_entry = {
                 'SID': sid,
@@ -163,12 +163,12 @@ class Connect_to_Frontend:
             }
 
             self.showing_logs.append(log_entry)  # 로그 저장
-            self.socketio.emit('requested_data', response_data, to=sid)
+            self.socketio.emit('responsed_data', response_data, to=sid)
             self.socketio.emit('receive_message', log_entry)
             self.app.logger.info(f"Sent message: {message} to {sid}")
 
         @self.socketio.on('delete_data')
-        def handle_update_data(message):
+        def handle_delete_data(message):
             sid=request.sid
             self.app.logger.info(f"Received message: {message}")
 
@@ -176,7 +176,7 @@ class Connect_to_Frontend:
             name_of_data=message.get('name_of_data')
             data=message.get('data')
 
-            response_data=mgmt_class.mgmt(user_id,'delete',name_of_data,data)
+            response_data=mgmt_class(user_id,'delete',name_of_data,data)
 
             log_entry = {
                 'SID': sid,
@@ -188,12 +188,12 @@ class Connect_to_Frontend:
             }
 
             self.showing_logs.append(log_entry)  # 로그 저장
-            self.socketio.emit('requested_data', response_data, to=sid)
+            self.socketio.emit('responsed_data', response_data, to=sid)
             self.socketio.emit('receive_message', log_entry)
             self.app.logger.info(f"Sent message: {message} to {sid}")
 
 #For_Debging
-        @self.socketio.on('update_message')
+        @self.socketio.on('send_message')
         def handle_message(message):
             client=request.sid
             self.app.logger.info(f"Received message: {message}")
@@ -223,8 +223,3 @@ class Connect_to_Frontend:
             self.app.logger.info(f"Sent response_public_key: {public_key}")
     
 
-
-
-if __name__ == "__main__":
-    security_enabled = True  # 또는 False로 설정
-    Connect_to_Frontend(security=security_enabled)
