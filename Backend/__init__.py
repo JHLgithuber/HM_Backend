@@ -7,6 +7,8 @@ import os
 import logging
 import json
 
+import mgmt_class
+
 class Connect_to_Frontend:
     def __init__(self, security):
         self.app = Flask(__name__)
@@ -91,8 +93,31 @@ class Connect_to_Frontend:
             return jsonify(access_token=access_token, current_user=current_user)
 
     def register_socketio_events(self):
+        @self.socketio.on('request_data')
+        def handle_request_data(message):
+            sid=request.sid
+            self.app.logger.info(f"Received message: {message}")
+            user_id = message.get('user').get('_id')
+            request_data=message.get('request_data')
+            log_entry = {
+                'SID': sid,
+                'ID': user_id,
+                'Request_data':request_data,
+                'ALL_JSON_DATA': message
+            }
+
+            mgmt_class.mgmt()
+
+
+            self.showing_logs.append(log_entry)  # 로그 저장
+            self.socketio.emit('requested_data', message, to=sid)
+            self.socketio.emit('receive_message', log_entry)
+            self.app.logger.info(f"Sent message: {message} to {sid}")
+            
+
         @self.socketio.on('send_message')
         def handle_message(message):
+            client=request.sid
             self.app.logger.info(f"Received message: {message}")
             user_id = message.get('user').get('_id')
             log_entry = {
@@ -100,8 +125,12 @@ class Connect_to_Frontend:
                 'JSON_DATA': message
             }
             self.showing_logs.append(log_entry)  # 로그 저장
-            self.socketio.emit('receive_message', message)
-            self.app.logger.info(f"Sent message: {message}")
+            self.socketio.emit('receive_message', message, to=client)
+            self.socketio.emit('receive_message', log_entry)
+            self.app.logger.info(f"Sent message: {message} to {client}")
+            self.app.logger.info(message)
+
+        #이 밑으로는 쓰래기임
 
         @self.socketio.on('request_public_key')
         def handle_request_public_key(data):
@@ -114,6 +143,9 @@ class Connect_to_Frontend:
             self.app.logger.info(f"Received response_public_key: {public_key}")
             self.socketio.emit('receive_response_public_key', public_key)
             self.app.logger.info(f"Sent response_public_key: {public_key}")
+    
+
+
 
 if __name__ == "__main__":
     security_enabled = True  # 또는 False로 설정
