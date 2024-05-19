@@ -93,7 +93,7 @@ class Connect_to_Frontend:
             return jsonify(access_token=access_token, current_user=current_user)
 
 #CURD
-        def register_socketio_events(self):
+    def register_socketio_events(self):
         @self.socketio.on('read_data')
         def handle_request_data(message):
             sid=request.sid
