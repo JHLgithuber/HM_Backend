@@ -71,7 +71,7 @@ class Connect_to_Frontend:
 
             login_result = login_class.login(self).compare_IDPW(username, password)
 
-            if login_result.permission != 'Login_Fail':
+            if login_result.permission not in ['Login_Fail', 'ID not found', 'Password mismatch']:
                 return jsonify(
                     access_token=login_result.access_token,
                     refresh_token=login_result.refresh_token,

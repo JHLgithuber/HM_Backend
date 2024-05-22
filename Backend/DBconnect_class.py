@@ -9,18 +9,18 @@ class Connect_to_DB:
         self.server=server
         self.index=0
         self.ID_index=0
-        self.cursor = self.review_db.cursor(pymysql.cursors.DictCursor) #딕셔너리 형태로 가져옴
-        #self.log=""
-        #self.sql=''''''
+        self.sql=''''''
         load_dotenv()
         self.wv_db_connection = pymysql.connect(
                 user=os.getenv('DB_ID'), 
                 passwd=os.getenv('DB_PW'), 
                 host=os.getenv('DB_HOST'),
-                port=os.getenv('DB_PORT'),
+                port=int(os.getenv('DB_PORT')),
                 db=os.getenv('DB_NAME'), 
                 charset='utf8'
             )
+        self.cursor = self.wv_db_connection.cursor(pymysql.cursors.DictCursor) #딕셔너리 형태로 가져옴
+        self.server.app.logger.info(f"DB연결 인스턴스 생성됨")
 
     def add_sql(self,sql):
         self.sql+=sql
