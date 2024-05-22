@@ -1,6 +1,6 @@
-
 # login_class.py
 from flask_jwt_extended import create_access_token, create_refresh_token, get_jwt_identity, jwt_required
+import Backend.DBconnect_class as DB_class
 
 class login:
     def __init__(self, server) -> None:
@@ -11,6 +11,8 @@ class login:
         self.permission = None
         self.access_token = None
         self.refresh_token = None
+
+        self.server.app.logger.info(f"Maked login instance")
 
     def compare_IDPW(self, username, password):
         # 회원정보 대조
@@ -30,6 +32,7 @@ class login:
             self.refresh_token = None
 
         # 로그인 결과 반환
+        self.server.app.logger.info(f"username of instance: {self.username}, password of instance: {self.password}")
         return self
 
     def make_token(self):

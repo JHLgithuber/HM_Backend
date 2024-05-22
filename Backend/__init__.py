@@ -11,7 +11,7 @@ import os
 
 import Backend.mgmt_class as mgmt_class
 import Backend.login_class as login_class
-import Backend.DBconnect_class as DB_class
+
 
 class Connect_to_Frontend:
     def __init__(self, security):
