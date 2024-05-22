@@ -43,7 +43,7 @@ CREATE TABLE Contract_data (
     MoveOutDeductionAmount INT, -- 퇴실 반환 공제액
     MoveOutDeductionDetails TEXT, -- 퇴실 반환 공제내역 (CSV - 내역, 금액)
     MoveOutConfirmationFile VARCHAR(255), -- 퇴실확인서 사본 (파일참조식별자)
-    MoveOutRemarks TEXT, -- 퇴실비고
+    MoveOutRemarks TEXT, -- 퇴실비고Tenant
     FOREIGN KEY (UnitId) REFERENCES Houseinfo_data(UnitId)
 );
 
@@ -113,7 +113,7 @@ CREATE TABLE Membership_data (
     ID VARCHAR(50) PRIMARY KEY, -- ID (PK)
     PasswordHash CHAR(64), -- PW (SHA-256)
     ResidentId VARCHAR(36), -- 주민관리번호 (FK - Resident_data.ResidentId)
-    Authority BOOLEAN, -- 권한
+    Authority CHAR(20), -- 권한
     Note TEXT, -- 비고
     FOREIGN KEY (ResidentId) REFERENCES Resident_data(ResidentId)
 );
