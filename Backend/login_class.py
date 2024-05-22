@@ -1,6 +1,7 @@
 # login_class.py
 from flask_jwt_extended import create_access_token, create_refresh_token, get_jwt_identity, jwt_required
 import Backend.DBconnect_class as DB_class
+from dotenv import load_dotenv
 
 class login:
     def __init__(self, server) -> None:
