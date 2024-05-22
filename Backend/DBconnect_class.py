@@ -1,32 +1,69 @@
 from ast import Global
-from numpy import NaN
+import os
+#from numpy import NaN
 import pymysql
-import pandas as pd
+from dotenv import load_dotenv
+#import pandas as pd
 class Connect_to_DB:
-     def __init__(self,server):
+    def __init__(self,server):
         self.server=server
         self.index=0
         self.ID_index=0
-        self.yogiyo=0
-        self.log=""
-        self.review_db = pymysql.connect(
-                user='DATA', 
-                passwd='data', 
-                host='jhlhome.myds.me',
-                port=49156,
-                db='TPJ', 
+        self.cursor = self.review_db.cursor(pymysql.cursors.DictCursor) #딕셔너리 형태로 가져옴
+        #self.log=""
+        #self.sql=''''''
+        load_dotenv()
+        self.wv_db_connection = pymysql.connect(
+                user=os.getenv('DB_ID'), 
+                passwd=os.getenv('DB_PW'), 
+                host=os.getenv('DB_HOST'),
+                port=os.getenv('DB_PORT'),
+                db=os.getenv('DB_NAME'), 
                 charset='utf8'
             )
 
-    def print_log(self):    #로그출력
-        print(self.log)
+    def add_sql(self,sql):
+        self.sql+=sql
+        self.server.app.logger.info(f"추가된 SQL: {sql}\n최종 SQL: {self.sql}")
+        return self
+    
+    def execute(self):
+        self.cursor.execute(self.sql)
+        self.inserted_id = self.cursor.lastrowid
+        self.row_count = self.cursor.rowcount
+        self.server.app.logger.info(f"SQL 쿼리함\ninserted_id: {self.inserted_id}   row_count: {self.row_count}\n SQL: {self.sql}")
+        return self
+
+    def commit(self):
+        self.wv_db_connection.commit()
+        self.inserted_id = self.cursor.lastrowid
+        self.row_count = self.cursor.rowcount
+        self.server.app.logger.info(f"SQL 커밋함\ninserted_id: {self.inserted_id}   row_count: {self.row_count}\n SQL: {self.sql}")
+        return self
+
+    def fetch(self):    #SELECT할때 결과 가져옴
+        self.fetch_data=self.cursor.fetchone()
+        self.server.app.logger.info(f"페치함 fetch_data:\n{self.fetch_data}")
+        return self
 
 
 
 
-class connection():  
+
    
-#리뷰-------------------------------------------------------------------------------------------------------------------------
+
+
+
+#쓰래기-------------------------------------------------------------------------------------------------------------------------
+
+    def db_reset(self): #리뷰 SQL테이블 초기화
+        self.cursor = self.wv_db.cursor(pymysql.cursors.DictCursor)
+        self.sql = '''TRUNCATE TPJ.All_Review;'''
+        self.cursor.execute(self.sql)
+        self.review_db.commit()
+        self.server.app.logger.info(f"리뷰 SQL테이블 초기화")
+
+
     def review_reset(self): #리뷰 SQL테이블 초기화
         self.cursor = self.review_db.cursor(pymysql.cursors.DictCursor)
         self.sql = '''TRUNCATE TPJ.All_Review;'''
