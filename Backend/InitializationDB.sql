@@ -43,7 +43,7 @@ CREATE TABLE Contract_data (
     MoveOutDeductionAmount INT, -- 퇴실 반환 공제액
     MoveOutDeductionDetails TEXT, -- 퇴실 반환 공제내역 (CSV - 내역, 금액)
     MoveOutConfirmationFile VARCHAR(255), -- 퇴실확인서 사본 (파일참조식별자)
-    MoveOutRemarks TEXT, -- 퇴실비고Tenant
+    MoveOutRemarks TEXT, -- 퇴실비고
     FOREIGN KEY (UnitId) REFERENCES Houseinfo_data(UnitId)
 );
 
