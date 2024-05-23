@@ -1,5 +1,5 @@
 # login_class.py
-from flask_jwt_extended import create_access_token, create_refresh_token, get_jwt_identity, jwt_required
+from flask_jwt_extended import create_access_token, create_refresh_token, get_jwt_identity, jwt_required, get_jwt
 import Backend.DBconnect_class as DB_class
 from dotenv import load_dotenv
 
@@ -29,17 +29,6 @@ class login:
             self.permission='Login_Fail'
             self.server.app.logger.info(f"Maked login instance")
 
-            # 임시 회원 인증
-        if self.username == 'admin' and self.password == '1234':
-            self.make_token()
-            self.permission = 'Landlord'
-        elif self.username == 'guest' and self.password == '1234':
-            self.make_token()
-            self.permission = 'Tenant'
-
-        
-        print(self.result)
-
         if self.result:
             if self.password==self.result['PasswordHash']:
                 self.permission=self.result['Authority']
@@ -65,14 +54,18 @@ class login:
         self.server.app.logger.info(f"access_token: {self.access_token}, refresh_token: {self.refresh_token}")
         return self
 
+    @staticmethod
     @jwt_required()
-    def protected(self):
-        self.username = get_jwt_identity()
+    def protected(self, access_token):
+        self.access_token=access_token
+        self.username = get_jwt_identity() 
+        self.permission = get_jwt().get('permission', None)
+        self.server.app.logger.info(f"Protected access_token: {self.access_token}, permission: {self.permission}")
         self.code = 200
         return self
 
     @jwt_required(refresh=True)
     def refresh(self):
         self.username = get_jwt_identity()
-        self.access_token = create_access_token(identity=self.username)
+        self.access_token = self.server.create_access_token(identity=self.username)
         return self
