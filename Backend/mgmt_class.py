@@ -3,6 +3,12 @@ import Backend.DBconnect_class as DB_class
 class mgmt:
     def __init__(self,id,CURD,entity,option,data,server,permission):
         self.id=id
+        self.CURD=CURD
+        self.entity=entity
+        self.option=option
+        self.data=data
+        self.server=server
+        self.permission=permission
         
         match entity:
             case 'Houseinfo_data':                
@@ -15,7 +21,7 @@ class mgmt:
                 elif CURD=='delete':
                     pass
                 else:
-                    raise
+                    raise ValueError
 
             case 'Contract_data':
                 if CURD=='read':
@@ -27,7 +33,7 @@ class mgmt:
                 elif CURD=='delete':
                     pass
                 else:
-                    raise
+                    raise ValueError
                 
             case 'Bill_data':
                 if CURD=='read':
@@ -39,7 +45,7 @@ class mgmt:
                 elif CURD=='delete':
                     pass
                 else:
-                    raise
+                    raise ValueError
                 
             case 'UtilUsage_data':
                 if CURD=='read':
@@ -51,7 +57,7 @@ class mgmt:
                 elif CURD=='delete':
                     pass
                 else:
-                    raise
+                    raise ValueError
                 
             case 'Resident_data':
                 if CURD=='read':
@@ -63,7 +69,7 @@ class mgmt:
                 elif CURD=='delete':
                     pass
                 else:
-                    raise
+                    raise ValueError
                 
             case 'Vehicle_data':
                 if CURD=='read':
@@ -75,7 +81,7 @@ class mgmt:
                 elif CURD=='delete':
                     pass
                 else:
-                    raise
+                    raise ValueError
                 
             case 'Membership_data':
                 if CURD=='read':
@@ -87,7 +93,7 @@ class mgmt:
                 elif CURD=='delete':
                     pass
                 else:
-                    raise
+                    raise ValueError
                 
             case 'Notice_data':
                 if CURD=='read':
@@ -99,7 +105,7 @@ class mgmt:
                 elif CURD=='delete':
                     pass
                 else:
-                    raise
+                    raise ValueError
     
     def permission_check(self,need_permission):
         if self.permission not in need_permission:

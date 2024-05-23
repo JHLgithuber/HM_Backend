@@ -3,7 +3,7 @@ import logging
 from flask import Flask, render_template, jsonify, request
 from flask_socketio import SocketIO
 from flask_jwt_extended import (
-    JWTManager, jwt_required, create_access_token, get_jwt_identity, unset_jwt_cookies, create_refresh_token
+    JWTManager, jwt_required, create_access_token, get_jwt_identity, get_jwt, unset_jwt_cookies, create_refresh_token
 )
 from dotenv import load_dotenv
 import ssl
@@ -84,7 +84,8 @@ class Connect_to_Frontend:
         @jwt_required()
         def protected():
             current_user = get_jwt_identity()
-            return jsonify(logged_in_as=current_user), 200
+            permission = get_jwt().get('permission', None)
+            return jsonify(logged_in_as=current_user, permission=permission), 200
 
         @self.app.route('/refresh', methods=['GET'])
         @jwt_required(refresh=True)
@@ -94,6 +95,46 @@ class Connect_to_Frontend:
             return jsonify(access_token=access_token, current_user=current_user)
 
     def register_socketio_events(self):
+        @self.socketio.on('mgmt_read')
+        def mgmt_data_read(message):
+            sid = request.sid
+            self.app.logger.info(f"Received message: {message}")
+            
+            # JWT 토큰 검증 및 클레임 추출
+            access_token = message.get('access_token')
+            if access_token:
+                with self.app.app_context():
+                    user_identity = None
+                    permission = None
+                    try:
+                        # 임시 요청 컨텍스트를 만들어 JWT 토큰에서 클레임 추출
+                        from flask_jwt_extended import decode_token
+                        decoded_token = decode_token(access_token)
+                        user_identity = decoded_token['sub']
+                        permission = decoded_token['permission']
+                    except Exception as e:
+                        self.app.logger.error(f"Error decoding JWT: {e}")
+            
+            self.app.logger.info(f"User identity: {user_identity}, Permission: {permission}")
+            
+            response_data = mgmt_class.mgmt(id=user_identity, CURD='read', entity=message.get('entity'), option=message.get('option'), data=None, server=self, permission=permission).result   #DB자료 없을때 예외처리 필요
+            print(response_data)
+
+            log_entry = {
+                'SID': sid,
+                'ID': user_identity,
+                'Requested_data': message.get('entity'),
+                'Responsed_data': response_data,
+                'ALL_JSON_DATA': message
+            }
+
+            self.showing_logs.append(log_entry)  # 로그 저장
+            self.socketio.emit('responsed_data', json.dumps(response_data), to=sid)
+            #self.socketio.emit('receive_message', log_entry)
+            self.app.logger.info(f"Sent message: {message} to {sid}")
+
+
+
         @self.socketio.on('read_data')
         def handle_request_data(message):
             sid = request.sid
