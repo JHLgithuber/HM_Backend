@@ -1,8 +1,9 @@
 import Backend.DBconnect_class as DB_class
 
 class mgmt:
-    def __init__(self,id,CURD,entity,option,data,server):
+    def __init__(self,id,CURD,entity,option,data,server,permission):
         self.id=id
+        
         match entity:
             case 'Houseinfo_data':                
                 if CURD=='read':
@@ -66,7 +67,7 @@ class mgmt:
                 
             case 'Vehicle_data':
                 if CURD=='read':
-                    self.standard_select_ALL()
+                    self.standard_read_ALL()
                 elif CURD=='create':
                     pass
                 elif CURD=='update':
@@ -99,6 +100,10 @@ class mgmt:
                     pass
                 else:
                     raise
+    
+    def permission_check(self,need_permission):
+        if self.permission not in need_permission:
+            raise PermissionError(f"{self.permission}is not in {need_permission}")
     
     def standard_read_ALL(self):
         self.result=DB_class.Connect_to_DB(self.server).add_sql(f"SELECT * FROM {self.entity};").execute().fetch().fetch_data
