@@ -95,8 +95,8 @@ class Connect_to_Frontend:
             return jsonify(access_token=access_token, current_user=current_user)
 
     def register_socketio_events(self):
-        @self.socketio.on('mgmt_read')
-        def mgmt_data_read(message):
+        @self.socketio.on('read_data')
+        def handle_request_data(message):
             sid = request.sid
             self.app.logger.info(f"Received message: {message}")
             
@@ -131,31 +131,6 @@ class Connect_to_Frontend:
             self.showing_logs.append(log_entry)  # 로그 저장
             self.socketio.emit('responsed_data', json.dumps(response_data), to=sid)
             #self.socketio.emit('receive_message', log_entry)
-            self.app.logger.info(f"Sent message: {message} to {sid}")
-
-
-
-        @self.socketio.on('read_data')
-        def handle_request_data(message):
-            sid = request.sid
-            self.app.logger.info(f"Received message: {message}")
-
-            user_id = message.get('user').get('_id')
-            name_of_data = message.get('name_of_data')
-
-            response_data = mgmt_class.mgmt(user_id, 'read', name_of_data, None, None)
-
-            log_entry = {
-                'SID': sid,
-                'ID': user_id,
-                'Requested_data': name_of_data,
-                'Responsed_data': response_data,
-                'ALL_JSON_DATA': message
-            }
-
-            self.showing_logs.append(log_entry)  # 로그 저장
-            self.socketio.emit('responsed_data', response_data, to=sid)
-            self.socketio.emit('receive_message', log_entry)
             self.app.logger.info(f"Sent message: {message} to {sid}")
 
         @self.socketio.on('update_data')
