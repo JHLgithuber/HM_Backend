@@ -96,6 +96,23 @@ class Connect_to_Frontend:
             access_token = create_access_token(identity=current_user)
             return jsonify(access_token=access_token, current_user=current_user)
 
+    def jwt_checked(self, access_token):
+        if access_token:
+            with self.app.app_context():
+                user_identity = None
+                permission = None
+                try:
+                    # 임시 요청 컨텍스트를 만들어 JWT 토큰에서 클레임 추출
+                    from flask_jwt_extended import decode_token
+                    decoded_token = decode_token(access_token)
+                    user_identity = decoded_token['sub']
+                    permission = decoded_token['permission']
+                except Exception as e:
+                    self.app.logger.error(f"Error decoding JWT: {e}")
+        self.app.logger.info(f"User identity: {user_identity}, Permission: {permission}")
+        return {'user_identity': user_identity,'permission': permission}
+
+
     def register_socketio_events(self):
         @self.socketio.on('read_data')
         def handle_request_data(message):
@@ -103,24 +120,13 @@ class Connect_to_Frontend:
             self.app.logger.info(f"Received message: {message}")
             
             # JWT 토큰 검증 및 클레임 추출
-            access_token = message.get('access_token')
-            if access_token:
-                with self.app.app_context():
-                    user_identity = None
-                    permission = None
-                    try:
-                        # 임시 요청 컨텍스트를 만들어 JWT 토큰에서 클레임 추출
-                        from flask_jwt_extended import decode_token
-                        decoded_token = decode_token(access_token)
-                        user_identity = decoded_token['sub']
-                        permission = decoded_token['permission']
-                    except Exception as e:
-                        self.app.logger.error(f"Error decoding JWT: {e}")
-            
-            self.app.logger.info(f"User identity: {user_identity}, Permission: {permission}")
+            jwd_checked_data=self.jwt_checked(message.get('access_token'))
 
             try:
-                response_data = mgmt_class.mgmt(id=user_identity, CURD='read', entity=message.get('entity'), where=message.get('where'), option=message.get('option'), data=None, server=self, permission=permission).result   #DB자료 없을때 예외처리 필요
+                response_data = mgmt_class.mgmt(id=jwd_checked_data['user_identity'], CURD='read',
+                                                entity=message.get('entity'), where=message.get('where'),
+                                                option=message.get('option'), data=None, server=self,
+                                                permission=jwd_checked_data['permission']).result   #DB자료 없을때 예외처리 필요
                 print(response_data)
             except Exception as e:
                 self.app.logger.error(f"Error mgmt data in DB: {e}")
@@ -128,7 +134,7 @@ class Connect_to_Frontend:
 
             log_entry = {
                 'SID': sid,
-                'ID': user_identity,
+                'ID': jwd_checked_data['user_identity'],
                 'Requested_data': message.get('entity'),
                 'Responsed_data': response_data,
                 'ALL_JSON_DATA': message
@@ -144,24 +150,29 @@ class Connect_to_Frontend:
             sid = request.sid
             self.app.logger.info(f"Received message: {message}")
 
-            user_id = message.get('user').get('_id')
-            name_of_data = message.get('name_of_data')
-            data = message.get('data')
+            # JWT 토큰 검증 및 클레임 추출
+            jwd_checked_data = self.jwt_checked(message.get('access_token'))
 
-            response_data = mgmt_class.mgmt(user_id, 'update', name_of_data, data, None)
+            try:
+                response_data = mgmt_class.mgmt(id=jwd_checked_data['user_identity'], CURD='update',
+                                                entity=message.get('entity'), where=message.get('where'),
+                                                option=message.get('option'), data=message.get('data'), server=self,
+                                                permission=jwd_checked_data['permission']).result  # DB자료 없을때 예외처리 필요
+                print(response_data)
+            except Exception as e:
+                self.app.logger.error(f"Error mgmt data in DB: {e}")
 
             log_entry = {
                 'SID': sid,
-                'ID': user_id,
-                'Updated_data': name_of_data,
-                'Updated_value': data,
+                'ID': jwd_checked_data['user_identity'],
+                'Requested_data': message.get('entity'),
                 'Responsed_data': response_data,
                 'ALL_JSON_DATA': message
             }
 
             self.showing_logs.append(log_entry)  # 로그 저장
-            self.socketio.emit('responsed_data', response_data, to=sid)
-            self.socketio.emit('receive_message', log_entry)
+            self.socketio.emit('responsed_data', json.dumps(response_data), to=sid)
+            # self.socketio.emit('receive_message', log_entry)
             self.app.logger.info(f"Sent message: {message} to {sid}")
 
         @self.socketio.on('create_data')
@@ -169,24 +180,29 @@ class Connect_to_Frontend:
             sid = request.sid
             self.app.logger.info(f"Received message: {message}")
 
-            user_id = message.get('user').get('_id')
-            name_of_data = message.get('name_of_data')
-            data = message.get('data')
+            # JWT 토큰 검증 및 클레임 추출
+            jwd_checked_data = self.jwt_checked(message.get('access_token'))
 
-            response_data = mgmt_class.mgmt(user_id, 'create', name_of_data, data, None)
+            try:
+                response_data = mgmt_class.mgmt(id=jwd_checked_data['user_identity'], CURD='create',
+                                                entity=message.get('entity'), where=message.get('where'),
+                                                option=message.get('option'), data=message.get('data'), server=self,
+                                                permission=jwd_checked_data['permission']).result  # DB자료 없을때 예외처리 필요
+                print(response_data)
+            except Exception as e:
+                self.app.logger.error(f"Error mgmt data in DB: {e}")
 
             log_entry = {
                 'SID': sid,
-                'ID': user_id,
-                'Created_data': name_of_data,
-                'Created_value': data,
+                'ID': jwd_checked_data['user_identity'],
+                'Requested_data': message.get('entity'),
                 'Responsed_data': response_data,
                 'ALL_JSON_DATA': message
             }
 
             self.showing_logs.append(log_entry)  # 로그 저장
-            self.socketio.emit('responsed_data', response_data, to=sid)
-            self.socketio.emit('receive_message', log_entry)
+            self.socketio.emit('responsed_data', json.dumps(response_data), to=sid)
+            # self.socketio.emit('receive_message', log_entry)
             self.app.logger.info(f"Sent message: {message} to {sid}")
 
         @self.socketio.on('delete_data')
@@ -194,24 +210,29 @@ class Connect_to_Frontend:
             sid = request.sid
             self.app.logger.info(f"Received message: {message}")
 
-            user_id = message.get('user').get('_id')
-            name_of_data = message.get('name_of_data')
-            data = message.get('data')
+            # JWT 토큰 검증 및 클레임 추출
+            jwd_checked_data = self.jwt_checked(message.get('access_token'))
 
-            response_data = mgmt_class.mgmt(user_id, 'delete', name_of_data, data, None)
+            try:
+                response_data = mgmt_class.mgmt(id=jwd_checked_data['user_identity'], CURD='delete',
+                                                entity=message.get('entity'), where=message.get('where'),
+                                                option=message.get('option'), data=message.get('data'), server=self,
+                                                permission=jwd_checked_data['permission']).result  # DB자료 없을때 예외처리 필요
+                print(response_data)
+            except Exception as e:
+                self.app.logger.error(f"Error mgmt data in DB: {e}")
 
             log_entry = {
                 'SID': sid,
-                'ID': user_id,
-                'Deleted_data': name_of_data,
-                'Deleted_value': data,
+                'ID': jwd_checked_data['user_identity'],
+                'Requested_data': message.get('entity'),
                 'Responsed_data': response_data,
                 'ALL_JSON_DATA': message
             }
 
             self.showing_logs.append(log_entry)  # 로그 저장
-            self.socketio.emit('responsed_data', response_data, to=sid)
-            self.socketio.emit('receive_message', log_entry)
+            self.socketio.emit('responsed_data', json.dumps(response_data), to=sid)
+            # self.socketio.emit('receive_message', log_entry)
             self.app.logger.info(f"Sent message: {message} to {sid}")
 
         @self.socketio.on('send_message')
