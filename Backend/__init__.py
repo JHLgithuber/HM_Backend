@@ -9,12 +9,14 @@ from dotenv import load_dotenv
 import ssl
 import os
 
+
 import Backend.mgmt_class as mgmt_class
 import Backend.login_class as login_class
 
 
 class Connect_to_Frontend:
     def __init__(self, security):
+        load_dotenv()
         self.app = Flask(__name__)
         self.socketio = SocketIO(self.app)
         self.showing_logs = []  # 로그를 저장할 리스트
@@ -116,9 +118,13 @@ class Connect_to_Frontend:
                         self.app.logger.error(f"Error decoding JWT: {e}")
             
             self.app.logger.info(f"User identity: {user_identity}, Permission: {permission}")
-            
-            response_data = mgmt_class.mgmt(id=user_identity, CURD='read', entity=message.get('entity'), option=message.get('option'), data=None, server=self, permission=permission).result   #DB자료 없을때 예외처리 필요
-            print(response_data)
+
+            try:
+                response_data = mgmt_class.mgmt(id=user_identity, CURD='read', entity=message.get('entity'), where=message.get('where'), option=message.get('option'), data=None, server=self, permission=permission).result   #DB자료 없을때 예외처리 필요
+                print(response_data)
+            except Exception as e:
+                self.app.logger.error(f"Error mgmt data in DB: {e}")
+
 
             log_entry = {
                 'SID': sid,

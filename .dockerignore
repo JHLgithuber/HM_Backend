@@ -5,7 +5,7 @@ __pycache__
 *.pyd
 .Python
 db.sqlite3
-venv
+venv*
 myenv_of_HM
 HM_Backend_VSCode_workspace.code-workspace
 .gitignore
