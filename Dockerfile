@@ -1,5 +1,5 @@
 # Python 공식 이미지를 기반으로 설정
-FROM python:3.8-slim
+FROM python:3.12
 
 # 작업 디렉터리 설정
 WORKDIR /app
