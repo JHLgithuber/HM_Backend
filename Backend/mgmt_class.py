@@ -1,9 +1,9 @@
 import Backend.DBconnect_class as DB_class
 
-class mgmt:
-    def __init__(self, id, CURD, entity, where, option, data, server, permission):
+class Mgmt:
+    def __init__(self, id, curd, entity, where, option, data, server, permission):
         self.id = id
-        self.CURD = CURD
+        self.curd = curd
         self.entity = entity
         self.where = where
         self.option = option
@@ -14,100 +14,100 @@ class mgmt:
         try:
             match entity:
                 case 'Houseinfo_data':
-                    if CURD == 'read':
-                        self.standard_read_ALL()
-                    elif CURD == 'create':
+                    if curd == 'read':
+                        self.standard_read_all()
+                    elif curd == 'create':
                         pass
-                    elif CURD == 'update':
+                    elif curd == 'update':
                         pass
-                    elif CURD == 'delete':
+                    elif curd == 'delete':
                         pass
                     else:
-                        raise ValueError(f"Invalid CURD operation: {CURD}")
+                        raise ValueError(f"Invalid curd operation: {curd}")
 
                 case 'Contract_data':
-                    if CURD == 'read':
+                    if curd == 'read':
                         pass
-                    elif CURD == 'create':
+                    elif curd == 'create':
                         pass
-                    elif CURD == 'update':
+                    elif curd == 'update':
                         pass
-                    elif CURD == 'delete':
+                    elif curd == 'delete':
                         pass
                     else:
-                        raise ValueError(f"Invalid CURD operation: {CURD}")
+                        raise ValueError(f"Invalid curd operation: {curd}")
 
                 case 'Bill_data':
-                    if CURD == 'read':
+                    if curd == 'read':
                         pass
-                    elif CURD == 'create':
+                    elif curd == 'create':
                         pass
-                    elif CURD == 'update':
+                    elif curd == 'update':
                         pass
-                    elif CURD == 'delete':
+                    elif curd == 'delete':
                         pass
                     else:
-                        raise ValueError(f"Invalid CURD operation: {CURD}")
+                        raise ValueError(f"Invalid curd operation: {curd}")
 
                 case 'UtilUsage_data':
-                    if CURD == 'read':
+                    if curd == 'read':
                         pass
-                    elif CURD == 'create':
+                    elif curd == 'create':
                         pass
-                    elif CURD == 'update':
+                    elif curd == 'update':
                         pass
-                    elif CURD == 'delete':
+                    elif curd == 'delete':
                         pass
                     else:
-                        raise ValueError(f"Invalid CURD operation: {CURD}")
+                        raise ValueError(f"Invalid curd operation: {curd}")
 
                 case 'Resident_data':
-                    if CURD == 'read':
+                    if curd == 'read':
                         pass
-                    elif CURD == 'create':
+                    elif curd == 'create':
                         pass
-                    elif CURD == 'update':
+                    elif curd == 'update':
                         pass
-                    elif CURD == 'delete':
+                    elif curd == 'delete':
                         pass
                     else:
-                        raise ValueError(f"Invalid CURD operation: {CURD}")
+                        raise ValueError(f"Invalid curd operation: {curd}")
 
                 case 'Vehicle_data':
-                    if CURD == 'read':
-                        self.standard_read_ALL()
-                    elif CURD == 'create':
+                    if curd == 'read':
+                        self.standard_read_all()
+                    elif curd == 'create':
                         pass
-                    elif CURD == 'update':
+                    elif curd == 'update':
                         pass
-                    elif CURD == 'delete':
+                    elif curd == 'delete':
                         pass
                     else:
-                        raise ValueError(f"Invalid CURD operation: {CURD}")
+                        raise ValueError(f"Invalid curd operation: {curd}")
 
                 case 'Membership_data':
-                    if CURD == 'read':
+                    if curd == 'read':
                         pass
-                    elif CURD == 'create':
+                    elif curd == 'create':
                         pass
-                    elif CURD == 'update':
+                    elif curd == 'update':
                         pass
-                    elif CURD == 'delete':
+                    elif curd == 'delete':
                         pass
                     else:
-                        raise ValueError(f"Invalid CURD operation: {CURD}")
+                        raise ValueError(f"Invalid curd operation: {curd}")
 
                 case 'Notice_data':
-                    if CURD == 'read':
+                    if curd == 'read':
                         pass
-                    elif CURD == 'create':
+                    elif curd == 'create':
                         pass
-                    elif CURD == 'update':
+                    elif curd == 'update':
                         pass
-                    elif CURD == 'delete':
+                    elif curd == 'delete':
                         pass
                     else:
-                        raise ValueError(f"Invalid CURD operation: {CURD}")
+                        raise ValueError(f"Invalid curd operation: {curd}")
 
                 case _:
                     raise ValueError(f"Invalid entity: {entity}")
@@ -120,7 +120,7 @@ class mgmt:
         if self.permission not in need_permission:
             raise PermissionError(f"{self.permission} is not in {need_permission}")
 
-    def standard_read_ALL(self):
+    def standard_read_all(self):
         try:
             self.result = DB_class.Connect_to_DB(self.server).add_sql(f"SELECT * FROM {self.entity};").execute().fetch().fetch_data
         except Exception as e:
@@ -128,7 +128,7 @@ class mgmt:
             raise RuntimeError(f"Failed to read data: {e}")
         return self
 
-    def standard_read_where(self):
+    def standard_read_where (self):
         try:
             self.result = DB_class.Connect_to_DB(self.server).add_sql(f"SELECT * FROM {self.entity} WHERE {self.where};").execute().fetch().fetch_data
         except Exception as e:

@@ -123,7 +123,7 @@ class Connect_to_Frontend:
             jwd_checked_data=self.jwt_checked(message.get('access_token'))
 
             try:
-                response_data = mgmt_class.mgmt(id=jwd_checked_data['user_identity'], CURD='read',
+                response_data = mgmt_class.Mgmt(id=jwd_checked_data['user_identity'], CURD='read',
                                                 entity=message.get('entity'), where=message.get('where'),
                                                 option=message.get('option'), data=None, server=self,
                                                 permission=jwd_checked_data['permission']).result   #DB자료 없을때 예외처리 필요
@@ -154,7 +154,7 @@ class Connect_to_Frontend:
             jwd_checked_data = self.jwt_checked(message.get('access_token'))
 
             try:
-                response_data = mgmt_class.mgmt(id=jwd_checked_data['user_identity'], CURD='update',
+                response_data = mgmt_class.Mgmt(id=jwd_checked_data['user_identity'], CURD='update',
                                                 entity=message.get('entity'), where=message.get('where'),
                                                 option=message.get('option'), data=message.get('data'), server=self,
                                                 permission=jwd_checked_data['permission']).result  # DB자료 없을때 예외처리 필요
@@ -184,7 +184,7 @@ class Connect_to_Frontend:
             jwd_checked_data = self.jwt_checked(message.get('access_token'))
 
             try:
-                response_data = mgmt_class.mgmt(id=jwd_checked_data['user_identity'], CURD='create',
+                response_data = mgmt_class.Mgmt(id=jwd_checked_data['user_identity'], CURD='create',
                                                 entity=message.get('entity'), where=message.get('where'),
                                                 option=message.get('option'), data=message.get('data'), server=self,
                                                 permission=jwd_checked_data['permission']).result  # DB자료 없을때 예외처리 필요
@@ -214,7 +214,7 @@ class Connect_to_Frontend:
             jwd_checked_data = self.jwt_checked(message.get('access_token'))
 
             try:
-                response_data = mgmt_class.mgmt(id=jwd_checked_data['user_identity'], CURD='delete',
+                response_data = mgmt_class.Mgmt(id=jwd_checked_data['user_identity'], curd='delete',
                                                 entity=message.get('entity'), where=message.get('where'),
                                                 option=message.get('option'), data=message.get('data'), server=self,
                                                 permission=jwd_checked_data['permission']).result  # DB자료 없을때 예외처리 필요
