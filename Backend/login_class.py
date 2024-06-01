@@ -1,6 +1,7 @@
 # login_class.py
 from flask_jwt_extended import create_access_token, create_refresh_token, get_jwt_identity, jwt_required, get_jwt
 import Backend.DBconnect_class as DB_class
+import Backend.entity_class as entity_class
 from dotenv import load_dotenv
 
 class login:
@@ -22,7 +23,14 @@ class login:
         self.server.app.logger.info(f"username of instance: {self.username}, password of instance: {self.password}")
 
         try:
-            self.result=DB_class.Connect_to_DB(self.server).add_sql(f"SELECT PasswordHash,Authority FROM Membership_data WHERE ID = '{self.username}';").execute().fetch().fetch_data
+            self.result_dict=(DB_class.Connect_to_DB(self.server)
+                              .add_sql(f"SELECT PasswordHash,Authority FROM Membership_data WHERE ID = '{self.username}';")
+                              .execute().fetch().fetch_data)
+
+
+            #self.result=entity_class.MembershipData(ID=self.result_dict['ID'],PasswordHash=self.result_dict['PasswordHash'])
+            self.result=entity_class.MembershipData.from_dict(self.result_dict)
+
         except Exception as e:
              # 다른 예외가 발생했을 때 실행할 코드
             print("An error occurred:", e)
@@ -30,9 +38,9 @@ class login:
             self.server.app.logger.info(f"Maked login instance")
 
         if self.result:
-            if self.password==self.result['PasswordHash']:
-                self.permission=self.result['Authority']
-                self.make_token()
+            if self.password==self.result.PasswordHash:
+               self.permission=self.result.Authority
+               self.make_token()
             else:
                 self.permission = 'Password mismatch'
                 self.access_token = None

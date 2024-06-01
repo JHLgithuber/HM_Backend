@@ -1,113 +1,122 @@
-from dataclasses import dataclass
-from typing import List, Optional
+from datetime import datetime
+from dataclasses import dataclass, field, replace
+from typing import Optional, Dict, Any
 
 @dataclass
 class HouseinfoData:
-    unit_id: str
-    furnishing: Optional[str] = None
-    location: Optional[str] = None
-    room_number: Optional[int] = None
-    rental_area: Optional[float] = None
-    housing_type: Optional[str] = None
-    standard_rent: Optional[int] = None
-    standard_management_fee: Optional[int] = None
-    standard_deposit: Optional[int] = None
-    remarks: Optional[str] = None
-    listing_status: Optional[bool] = None
+    UnitId: str  # 세대번호 (PK)
+    Furnishing: Optional[str] = None  # 비품정보 (CSV - 비품명, 수량, 상태)
+    Location: Optional[str] = None  # 소재지
+    RoomNumber: Optional[int] = None  # 호실
+    RentalArea: Optional[float] = None  # 임대면적
+    HousingType: Optional[str] = None  # 주택유형
+    StandardRent: Optional[int] = None  # 표준 임대료
+    StandardManagementFee: Optional[int] = None  # 표준 관리비
+    StandardDeposit: Optional[int] = None  # 표준 보증금
+    Remarks: Optional[str] = None  # 비고
+    ListingStatus: Optional[bool] = True  # 매물여부
+
 
 @dataclass
 class ContractData:
-    contract_id: str
-    unit_id: str
-    tenant_name: Optional[str] = None
-    personal_id: Optional[str] = None
-    address: Optional[str] = None
-    phone_number: Optional[str] = None
-    account_number: Optional[str] = None
-    language: Optional[str] = None
-    contract_start_date: Optional[str] = None
-    move_in_date: Optional[str] = None
-    contract_end_date: Optional[str] = None
-    move_out_date: Optional[str] = None
-    contract_rent: Optional[int] = None
-    contract_management_fee: Optional[int] = None
-    contract_deposit: Optional[int] = None
-    down_payment: Optional[int] = None
-    balance_payment: Optional[int] = None
-    special_terms: Optional[str] = None
-    contract_file: Optional[str] = None
-    contract_remarks: Optional[str] = None
-    move_out_return_account: Optional[str] = None
-    move_out_deduction_amount: Optional[int] = None
-    move_out_deduction_details: Optional[str] = None
-    move_out_confirmation_file: Optional[str] = None
-    move_out_remarks: Optional[str] = None
+    ContractId: str  # 계약관리번호 (UUID, PK)
+    UnitId: Optional[str] = None  # 세대번호 (FK - HouseinfoData.UnitId)
+    TenantName: Optional[str] = None  # 임차인 성명
+    PersonalId: Optional[str] = None  # 주민번호
+    Address: Optional[str] = None  # 주소
+    PhoneNumber: Optional[str] = None  # 전화번호
+    AccountNumber: Optional[str] = None  # 계좌번호
+    Language: Optional[str] = None  # 언어
+    ContractStartDate: Optional[datetime] = None  # 계약 시작일
+    MoveInDate: Optional[datetime] = None  # 입실일
+    ContractEndDate: Optional[datetime] = None  # 계약 종료일
+    MoveOutDate: Optional[datetime] = None  # 퇴실일
+    ContractRent: Optional[int] = None  # 계약 임대료
+    ContractManagementFee: Optional[int] = None  # 계약 관리비
+    ContractDeposit: Optional[int] = None  # 계약 보증금
+    DownPayment: Optional[int] = None  # 계약금
+    BalancePayment: Optional[int] = None  # 잔금
+    SpecialTerms: Optional[str] = None  # 특약사항
+    ContractFile: Optional[str] = None  # 계약서 사본 (파일참조식별자)
+    ContractRemarks: Optional[str] = None  # 계약비고
+    MoveOutReturnAccount: Optional[str] = None  # 퇴실 반환 계좌번호
+    MoveOutDeductionAmount: Optional[int] = None  # 퇴실 반환 공제액
+    MoveOutDeductionDetails: Optional[str] = None  # 퇴실 반환 공제내역 (CSV - 내역, 금액)
+    MoveOutConfirmationFile: Optional[str] = None  # 퇴실확인서 사본 (파일참조식별자)
+    MoveOutRemarks: Optional[str] = None  # 퇴실비고
 
 @dataclass
 class BillData:
-    bill_id: str
-    contract_id: str
-    bill_date: Optional[str] = None
-    period_start_date: Optional[str] = None
-    period_end_date: Optional[str] = None
-    rent: Optional[int] = None
-    management_fee: Optional[int] = None
-    unpaid_amount: Optional[int] = None
-    water_bill: Optional[int] = None
-    electricity_bill: Optional[int] = None
-    gas_bill: Optional[int] = None
-    heating_bill: Optional[int] = None
-    communication_bill: Optional[int] = None
-    adjustment: Optional[str] = None
-    bill_remarks: Optional[str] = None
-    payment_method: Optional[str] = None
-    payment_due_date: Optional[str] = None
-    last_payment_date: Optional[str] = None
-    paid_amount: Optional[int] = None
-    payment_remarks: Optional[str] = None
-    ai_comment: Optional[str] = None
+    BillId: str  # 청구관리번호 (UUID, PK)
+    ContractId: Optional[str] = None  # 계약관리번호 (FK - ContractData.ContractId)
+    BillDate: Optional[datetime] = None  # 청구일
+    PeriodStartDate: Optional[datetime] = None  # 청구기간 시작일
+    PeriodEndDate: Optional[datetime] = None  # 청구기간 종료일
+    Rent: Optional[int] = None  # 임대료
+    ManagementFee: Optional[int] = None  # 관리비
+    UnpaidAmount: Optional[int] = None  # 미납금
+    WaterBill: Optional[int] = None  # 수도청구액
+    ElectricityBill: Optional[int] = None  # 전기청구액
+    GasBill: Optional[int] = None  # 가스청구액
+    HeatingBill: Optional[int] = None  # 난방청구액
+    CommunicationBill: Optional[int] = None  # 통신청구액
+    Adjustment: Optional[str] = None  # 가감액 (CSV - 내역, 금액)
+    BillRemarks: Optional[str] = None  # 청구비고
+    PaymentMethod: Optional[str] = None  # 납입 방식
+    PaymentDueDate: Optional[datetime] = None  # 납입 기한
+    LastPaymentDate: Optional[datetime] = None  # 마지막 납입 날짜
+    PaidAmount: Optional[int] = None  # 납입액
+    PaymentRemarks: Optional[str] = None  # 납입비고
+    AIComment: Optional[str] = None  # AI 코멘트
 
 @dataclass
 class UtilUsageData:
-    measurement_time: str
-    unit_id: str
-    utility_type: str
-    measurement_value: Optional[float] = None
+    MeasurementTime: datetime  # 계량시각 (PK)
+    UnitId: str  # 세대번호 (PK, FK - HouseinfoData.UnitId)
+    UtilityType: str  # 계량대상 (PK)
+    MeasurementValue: Optional[float] = None  # 계량값
 
 @dataclass
 class ResidentData:
-    resident_id: str
-    contract_id: str
-    name: Optional[str] = None
-    family_relationship: Optional[str] = None
-    phone_number: Optional[str] = None
-    language: Optional[str] = None
-    residency_status: Optional[bool] = None
-    approval_status: Optional[bool] = None
+    ResidentId: str  # 주민관리번호 (UUID, PK)
+    ContractId: Optional[str] = None  # 계약관리번호 (FK - ContractData.ContractId)
+    Name: Optional[str] = None  # 성명
+    FamilyRelationship: Optional[str] = None  # 관계
+    PhoneNumber: Optional[str] = None  # 전화번호
+    Language: Optional[str] = None  # 언어
+    ResidencyStatus: Optional[bool] = None  # 거주여부
+    ApprovalStatus: Optional[bool] = None  # 승인상태
 
 @dataclass
 class VehicleData:
-    vehicle_number: str
-    contract_id: str
-    resident_id: str
-    additional_phone_number: Optional[str] = None
-    vehicle_type: Optional[str] = None
-    parking_type: Optional[str] = None
+    VehicleNumber: str  # 차량번호 (PK)
+    ContractId: Optional[str] = None  # 계약관리번호 (FK - ContractData.ContractId)
+    ResidentId: Optional[str] = None  # 주민관리번호 (FK - ResidentData.ResidentId)
+    AdditionalPhoneNumber: Optional[str] = None  # 추가전화번호
+    VehicleType: Optional[str] = None  # 차종
+    ParkingType: Optional[str] = None  # 주차구분 (상시 or 수시)
 
 @dataclass
 class MembershipData:
-    id: str
-    password_hash: Optional[str] = None
-    resident_id: Optional[str] = None
-    authority: Optional[str] = None
-    note: Optional[str] = None
+    ID: str  # ID (PK)
+    PasswordHash: str  # PW (SHA-256)
+    ResidentId: Optional[str] = None  # 주민관리번호 (FK - ResidentData.ResidentId)
+    Authority: Optional[str] = None  # 권한
+    Note: Optional[str] = None  # 비고
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]):
+        # 데이터 클래스를 생성하면서 딕셔너리 값을 반영
+        return cls(**{f.name: data.get(f.name) for f in cls.__dataclass_fields__.values()})
 
 @dataclass
 class NoticeData:
-    notice_id: str
-    author_id: str
-    content: Optional[str] = None
-    notice_targets: Optional[str] = None
-    created_date: Optional[str] = None
-    last_modified_date: Optional[str] = None
-    delivery_status: Optional[bool] = None
+    NoticeId: str  # 공지번호 (UUID, PK)
+    AuthorId: Optional[str] = None  # 작성자 (FK - MembershipData.ID)
+    Content: Optional[str] = None  # 내용
+    NoticeTargets: Optional[str] = None  # 공지대상 (다중값 - ResidentData.ResidentId, VehicleData.VehicleNumber, ContractData.ContractId, 수동입력전화번호)
+    CreatedDate: Optional[datetime] = None  # 최초작성일
+    LastModifiedDate: Optional[datetime] = None  # 마지막수정일
+    DeliveryStatus: Optional[bool] = None  # 발송상태
+
+
