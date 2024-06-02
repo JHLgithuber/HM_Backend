@@ -36,7 +36,7 @@ class Connect_to_DB:
             self.cursor.execute(self.sql)
             self.inserted_id = self.cursor.lastrowid
             self.row_count = self.cursor.rowcount
-            self.server.app.logger.info(f"SQL 쿼리 실행됨\ninserted_id: {self.inserted_id}   row_count: {self.row_count}\n SQL: {self.sql}")
+            self.server.app.logger.info(f"SQL 쿼리 실행됨\tinserted_id: {self.inserted_id}\trow_count: {self.row_count}\n SQL: {self.sql}")
         except pymysql.MySQLError as e:
             self.server.app.logger.error(f"SQL 실행 오류: {e}")
             raise RuntimeError(f"Failed to execute SQL query: {e}")
@@ -47,7 +47,7 @@ class Connect_to_DB:
             self.wv_db_connection.commit()
             self.inserted_id = self.cursor.lastrowid
             self.row_count = self.cursor.rowcount
-            self.server.app.logger.info(f"SQL 커밋됨\ninserted_id: {self.inserted_id}   row_count: {self.row_count}\n SQL: {self.sql}")
+            self.server.app.logger.info(f"SQL 커밋됨\tinserted_id: {self.inserted_id}\trow_count: {self.row_count}\n SQL: {self.sql}")
         except pymysql.MySQLError as e:
             self.server.app.logger.error(f"SQL 커밋 오류: {e}")
             raise RuntimeError(f"Failed to commit SQL query: {e}")
@@ -55,7 +55,7 @@ class Connect_to_DB:
 
     def fetch(self):  # SELECT할때 결과 가져옴
         try:
-            self.fetch_data = self.cursor.fetchone()  # 하나만 가져오는거 같은데...
+            self.fetch_data = self.cursor.fetchall()
             self.server.app.logger.info(f"페치됨 fetch_data:\n{self.fetch_data}")
         except pymysql.MySQLError as e:
             self.server.app.logger.error(f"데이터 페치 오류: {e}")

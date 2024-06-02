@@ -20,6 +20,9 @@ class FunctionOfEntity(ABC):
         # 데이터 클래스를 JSON 문자열로 변환
         return json.dumps(asdict(self), ensure_ascii=False)
 
+    def to_dict(self) -> Dict[str, Any]:
+        return asdict(self)
+
 @dataclass
 class HouseInfoData(FunctionOfEntity):
     UnitId: str  # 세대번호 (PK)

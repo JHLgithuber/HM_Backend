@@ -138,11 +138,12 @@ class Connect_to_Frontend:
             jwd_checked_data = self.jwt_checked(message.get('access_token'))
 
             try:
-                response_data_from_db = mgmt_class.Mgmt(id=jwd_checked_data['user_identity'], curd=curd,
+                response_data_from_result_entity_instance_list = mgmt_class.Mgmt(
+                                                id=jwd_checked_data['user_identity'], curd=curd,
                                                 entity=message.get('entity'), where=message.get('where'),
                                                 option=message.get('option'), data=message.get('data'), server=self,
-                                                permission=jwd_checked_data['permission']).result  # DB자료 없을때 예외처리 필요
-                print(response_data_from_db)
+                                                permission=jwd_checked_data['permission']).get_result_entity_instance_list()  # DB자료 없을때 예외처리 필요
+                print(response_data_from_result_entity_instance_list)
             except Exception as e:
                 self.app.logger.error(f"Error mgmt data in DB: {e}")
 
@@ -150,12 +151,16 @@ class Connect_to_Frontend:
                 'SID': sid,
                 'ID': jwd_checked_data['user_identity'],
                 'Requested_data': message.get('entity'),
-                'Responsed_data': response_data_from_db,
-                'ALL_JSON_DATA': message
+                'Responsed_data': response_data_from_result_entity_instance_list,
+                'ALL_Receive_DATA': message
             }
 
+            json_data = []
+            for item in response_data_from_result_entity_instance_list:
+                json_data.append(item.to_dict())
+
             response_data_to_frontend=json.dumps({
-                "JSON_DATA": response_data_from_db.to_json()
+                "JSON_DATA": json_data
             }, indent=4)
 
             self.showing_logs.append(log_entry)  # 로그 저장

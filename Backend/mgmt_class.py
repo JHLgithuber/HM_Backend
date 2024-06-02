@@ -12,13 +12,20 @@ class Mgmt:
         self.server = server
         self.permission = permission
 
+        self.result_entity_instance_list =None
+
         try:
             match entity:
                 case 'Houseinfo_data':
                     if curd == 'read':
-                        self.result = entity_class.HouseInfoData.from_dict(DB_class.Connect_to_DB(self.server)
-                                                                            .add_sql(f"SELECT * FROM {self.entity};")
-                                                                            .execute().fetch().fetch_data)
+                        if where is not None:
+                            self.result_entity_instance_list = [entity_class.HouseInfoData.from_dict(self.standard_read_where())]
+
+                        else:
+                            self.result_entity_instance_list=[]
+                            for result_item_in_list in self.standard_read_all():
+                                self.result_entity_instance_list.append(entity_class.HouseInfoData.from_dict(result_item_in_list))
+
                     elif curd == 'create':
                         pass
                     elif curd == 'update':
@@ -124,34 +131,33 @@ class Mgmt:
             raise PermissionError(f"{self.permission} is not in {need_permission}")
 
 
-    def standard_read_all(self,entity_instance):
+    def standard_read_all(self):
         try:
-            pass
+            self.fetch_data = (DB_class.Connect_to_DB(self.server).add_sql(f"SELECT * FROM {self.entity};")
+                           .execute().fetch().fetch_data)
 
         except Exception as e:
             self.server.app.logger.error(f"Error in standard_read_ALL: {e}")
             raise RuntimeError(f"Failed to read data: {e}")
-        return self.result
+        return self.fetch_data
 
     def standard_read_where (self):
         try:
-            self.result=entity_class.MembershipData.from_dict(DB_class.Connect_to_DB(self.server)
-                              .add_sql(f"SELECT * FROM {self.entity} WHERE {self.where};")
+            self.fetch_data=(DB_class.Connect_to_DB(self.server).add_sql(f"SELECT * FROM {self.entity} WHERE {self.where};")
                               .execute().fetch().fetch_data)
         except Exception as e:
             self.server.app.logger.error(f"Error in standard_read_where: {e}")
             raise RuntimeError(f"Failed to read data with where clause: {e}")
-        return self.result
+        return self.fetch_data
 
     def standard_read_opt(self): # 특수 옵션 적용
         try:
-            self.result=entity_class.MembershipData.from_dict(DB_class.Connect_to_DB(self.server)
-                              .add_sql(f"SELECT * FROM {self.entity} WHERE {self.where};")
+            self.fetch_data=(DB_class.Connect_to_DB(self.server).add_sql(f"SELECT * FROM {self.entity} WHERE {self.where};")
                               .execute().fetch().fetch_data)
         except Exception as e:
             self.server.app.logger.error(f"Error in standard_read_opt: {e}")
             raise RuntimeError(f"Failed to read data with options: {e}")
-        return self.result
+        return self.fetch_data
 
     def standard_create_opt(self):
         pass
@@ -161,3 +167,6 @@ class Mgmt:
 
     def standard_delete_opt(self):
         pass
+
+    def get_result_entity_instance_list(self):
+        return self.result_entity_instance_list
