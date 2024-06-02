@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 import ssl
 import os
 import secrets
+from datetime import date, datetime
 
 
 import Backend.mgmt_class as mgmt_class
@@ -27,9 +28,9 @@ class Connect_to_Frontend:
         self.app.logger.setLevel(logging.INFO)
         self.app.logger.info('서버 시작됨')
 
-        #print(secrets.token_urlsafe(4096))
+        #print(secrets.token_urlsafe(1024))
         # JWT 설정
-        self.app.config['JWT_SECRET_KEY'] = secrets.token_urlsafe(4096) #서버 시작때마다 난수 시크릿키 생성
+        self.app.config['JWT_SECRET_KEY'] = secrets.token_urlsafe(1024) #서버 시작때마다 난수 시크릿키 생성
         self.jwt = JWTManager(self.app)
 
         self.register_routes()
@@ -145,7 +146,7 @@ class Connect_to_Frontend:
                                                 entity=message.get('entity'), where=message.get('where'),
                                                 option=message.get('option'), data=message.get('data'), server=self,
                                                 permission=jwd_checked_data['permission']).get_result_entity_instance_list()  # DB자료 없을때 예외처리 필요
-                print(response_data_from_result_entity_instance_list)
+                print("\nresponse_data_from_result_entity_instance_list\t",response_data_from_result_entity_instance_list)
             except Exception as e:
                 self.app.logger.error(f"Error mgmt data in DB: {e}")
 
@@ -161,8 +162,20 @@ class Connect_to_Frontend:
             for item in response_data_from_result_entity_instance_list:
                 json_data.append(item.to_dict())
 
+            def convert_dates(obj):
+                """Convert date and datetime objects to string in a nested structure."""
+                if isinstance(obj, dict):
+                    return {k: convert_dates(v) for k, v in obj.items()}
+                elif isinstance(obj, list):
+                    return [convert_dates(i) for i in obj]
+                elif isinstance(obj, (date, datetime)):
+                    return obj.isoformat()
+                return obj
+
+            print("\njson_data\t",json_data)
+
             response_data_to_frontend=json.dumps({
-                "JSON_DATA": json_data
+                "JSON_DATA": convert_dates(json_data)
             }, indent=4)
 
             self.showing_logs.append(log_entry)  # 로그 저장
