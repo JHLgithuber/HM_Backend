@@ -1,4 +1,5 @@
 import Backend.DBconnect_class as DB_class
+import Backend.entity_class as entity_class
 
 class Mgmt:
     def __init__(self, id, curd, entity, where, option, data, server, permission):
@@ -15,7 +16,9 @@ class Mgmt:
             match entity:
                 case 'Houseinfo_data':
                     if curd == 'read':
-                        self.standard_read_all()
+                        self.result = entity_class.HouseInfoData.from_dict(DB_class.Connect_to_DB(self.server)
+                                                                            .add_sql(f"SELECT * FROM {self.entity};")
+                                                                            .execute().fetch().fetch_data)
                     elif curd == 'create':
                         pass
                     elif curd == 'update':
@@ -120,29 +123,35 @@ class Mgmt:
         if self.permission not in need_permission:
             raise PermissionError(f"{self.permission} is not in {need_permission}")
 
-    def standard_read_all(self):
+
+    def standard_read_all(self,entity_instance):
         try:
-            self.result = DB_class.Connect_to_DB(self.server).add_sql(f"SELECT * FROM {self.entity};").execute().fetch().fetch_data
+            pass
+
         except Exception as e:
             self.server.app.logger.error(f"Error in standard_read_ALL: {e}")
             raise RuntimeError(f"Failed to read data: {e}")
-        return self
+        return self.result
 
     def standard_read_where (self):
         try:
-            self.result = DB_class.Connect_to_DB(self.server).add_sql(f"SELECT * FROM {self.entity} WHERE {self.where};").execute().fetch().fetch_data
+            self.result=entity_class.MembershipData.from_dict(DB_class.Connect_to_DB(self.server)
+                              .add_sql(f"SELECT * FROM {self.entity} WHERE {self.where};")
+                              .execute().fetch().fetch_data)
         except Exception as e:
             self.server.app.logger.error(f"Error in standard_read_where: {e}")
             raise RuntimeError(f"Failed to read data with where clause: {e}")
-        return self
+        return self.result
 
     def standard_read_opt(self): # 특수 옵션 적용
         try:
-            self.result = DB_class.Connect_to_DB(self.server).add_sql(f"SELECT * FROM {self.entity};").execute().fetch().fetch_data
+            self.result=entity_class.MembershipData.from_dict(DB_class.Connect_to_DB(self.server)
+                              .add_sql(f"SELECT * FROM {self.entity} WHERE {self.where};")
+                              .execute().fetch().fetch_data)
         except Exception as e:
             self.server.app.logger.error(f"Error in standard_read_opt: {e}")
             raise RuntimeError(f"Failed to read data with options: {e}")
-        return self
+        return self.result
 
     def standard_create_opt(self):
         pass

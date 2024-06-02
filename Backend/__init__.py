@@ -115,98 +115,22 @@ class Connect_to_Frontend:
 
     def register_socketio_events(self):
         @self.socketio.on('read_data')
-        def handle_request_data(message):
-            sid = request.sid
-            self.app.logger.info(f"Received message: {message}")
-            
-            # JWT 토큰 검증 및 클레임 추출
-            jwd_checked_data=self.jwt_checked(message.get('access_token'))
-
-            try:
-                response_data = mgmt_class.Mgmt(id=jwd_checked_data['user_identity'], CURD='read',
-                                                entity=message.get('entity'), where=message.get('where'),
-                                                option=message.get('option'), data=None, server=self,
-                                                permission=jwd_checked_data['permission']).result   #DB자료 없을때 예외처리 필요
-                print(response_data)
-            except Exception as e:
-                self.app.logger.error(f"Error mgmt data in DB: {e}")
-
-
-            log_entry = {
-                'SID': sid,
-                'ID': jwd_checked_data['user_identity'],
-                'Requested_data': message.get('entity'),
-                'Responsed_data': response_data,
-                'ALL_JSON_DATA': message
-            }
-
-            self.showing_logs.append(log_entry)  # 로그 저장
-            self.socketio.emit('responsed_data', json.dumps(response_data), to=sid)
-            #self.socketio.emit('receive_message', log_entry)
-            self.app.logger.info(f"Sent message: {message} to {sid}")
+        def handle_read_data(message):
+            handle_data(message,'read')
 
         @self.socketio.on('update_data')
         def handle_update_data(message):
-            sid = request.sid
-            self.app.logger.info(f"Received message: {message}")
-
-            # JWT 토큰 검증 및 클레임 추출
-            jwd_checked_data = self.jwt_checked(message.get('access_token'))
-
-            try:
-                response_data = mgmt_class.Mgmt(id=jwd_checked_data['user_identity'], CURD='update',
-                                                entity=message.get('entity'), where=message.get('where'),
-                                                option=message.get('option'), data=message.get('data'), server=self,
-                                                permission=jwd_checked_data['permission']).result  # DB자료 없을때 예외처리 필요
-                print(response_data)
-            except Exception as e:
-                self.app.logger.error(f"Error mgmt data in DB: {e}")
-
-            log_entry = {
-                'SID': sid,
-                'ID': jwd_checked_data['user_identity'],
-                'Requested_data': message.get('entity'),
-                'Responsed_data': response_data,
-                'ALL_JSON_DATA': message
-            }
-
-            self.showing_logs.append(log_entry)  # 로그 저장
-            self.socketio.emit('responsed_data', json.dumps(response_data), to=sid)
-            # self.socketio.emit('receive_message', log_entry)
-            self.app.logger.info(f"Sent message: {message} to {sid}")
+            handle_data(message, 'update')
 
         @self.socketio.on('create_data')
         def handle_create_data(message):
-            sid = request.sid
-            self.app.logger.info(f"Received message: {message}")
-
-            # JWT 토큰 검증 및 클레임 추출
-            jwd_checked_data = self.jwt_checked(message.get('access_token'))
-
-            try:
-                response_data = mgmt_class.Mgmt(id=jwd_checked_data['user_identity'], CURD='create',
-                                                entity=message.get('entity'), where=message.get('where'),
-                                                option=message.get('option'), data=message.get('data'), server=self,
-                                                permission=jwd_checked_data['permission']).result  # DB자료 없을때 예외처리 필요
-                print(response_data)
-            except Exception as e:
-                self.app.logger.error(f"Error mgmt data in DB: {e}")
-
-            log_entry = {
-                'SID': sid,
-                'ID': jwd_checked_data['user_identity'],
-                'Requested_data': message.get('entity'),
-                'Responsed_data': response_data,
-                'ALL_JSON_DATA': message
-            }
-
-            self.showing_logs.append(log_entry)  # 로그 저장
-            self.socketio.emit('responsed_data', json.dumps(response_data), to=sid)
-            # self.socketio.emit('receive_message', log_entry)
-            self.app.logger.info(f"Sent message: {message} to {sid}")
+            handle_data(message,'create')
 
         @self.socketio.on('delete_data')
         def handle_delete_data(message):
+            handle_data(message,'delete')
+
+        def handle_data(message,curd):
             sid = request.sid
             self.app.logger.info(f"Received message: {message}")
 
@@ -214,11 +138,11 @@ class Connect_to_Frontend:
             jwd_checked_data = self.jwt_checked(message.get('access_token'))
 
             try:
-                response_data = mgmt_class.Mgmt(id=jwd_checked_data['user_identity'], curd='delete',
+                response_data_from_db = mgmt_class.Mgmt(id=jwd_checked_data['user_identity'], curd=curd,
                                                 entity=message.get('entity'), where=message.get('where'),
                                                 option=message.get('option'), data=message.get('data'), server=self,
                                                 permission=jwd_checked_data['permission']).result  # DB자료 없을때 예외처리 필요
-                print(response_data)
+                print(response_data_from_db)
             except Exception as e:
                 self.app.logger.error(f"Error mgmt data in DB: {e}")
 
@@ -226,14 +150,19 @@ class Connect_to_Frontend:
                 'SID': sid,
                 'ID': jwd_checked_data['user_identity'],
                 'Requested_data': message.get('entity'),
-                'Responsed_data': response_data,
+                'Responsed_data': response_data_from_db,
                 'ALL_JSON_DATA': message
             }
 
+            response_data_to_frontend=json.dumps({
+                "JSON_DATA": response_data_from_db.to_json()
+            }, indent=4)
+
             self.showing_logs.append(log_entry)  # 로그 저장
-            self.socketio.emit('responsed_data', json.dumps(response_data), to=sid)
+            self.socketio.emit('responsed_data', response_data_to_frontend, to=sid)
             # self.socketio.emit('receive_message', log_entry)
-            self.app.logger.info(f"Sent message: {message} to {sid}")
+            self.app.logger.info(f"Sent message: {response_data_to_frontend} to {sid}")
+
 
         @self.socketio.on('send_message')
         def handle_message(message):

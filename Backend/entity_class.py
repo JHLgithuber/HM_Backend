@@ -1,9 +1,27 @@
 from datetime import datetime
-from dataclasses import dataclass, field, replace
+from dataclasses import dataclass, asdict, fields
 from typing import Optional, Dict, Any
+from abc import ABC, abstractmethod
+import json
+
+class FunctionOfEntity(ABC):
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]):
+        # 데이터 클래스를 생성하면서 딕셔너리 값을 반영
+        return cls(**{f.name: data.get(f.name) for f in fields(cls)})
+
+    def update_from_dict(self, data: Dict[str, Any]):
+        # 인스턴스의 값을 딕셔너리 값으로 업데이트
+        for f in fields(self):
+            if f.name in data:
+                setattr(self, f.name, data[f.name])
+
+    def to_json(self) -> str:
+        # 데이터 클래스를 JSON 문자열로 변환
+        return json.dumps(asdict(self), ensure_ascii=False)
 
 @dataclass
-class HouseinfoData:
+class HouseInfoData(FunctionOfEntity):
     UnitId: str  # 세대번호 (PK)
     Furnishing: Optional[str] = None  # 비품정보 (CSV - 비품명, 수량, 상태)
     Location: Optional[str] = None  # 소재지
@@ -97,17 +115,13 @@ class VehicleData:
     ParkingType: Optional[str] = None  # 주차구분 (상시 or 수시)
 
 @dataclass
-class MembershipData:
+class MembershipData(FunctionOfEntity):
     ID: str  # ID (PK)
     PasswordHash: str  # PW (SHA-256)
     ResidentId: Optional[str] = None  # 주민관리번호 (FK - ResidentData.ResidentId)
     Authority: Optional[str] = None  # 권한
     Note: Optional[str] = None  # 비고
 
-    @classmethod
-    def from_dict(cls, data: Dict[str, Any]):
-        # 데이터 클래스를 생성하면서 딕셔너리 값을 반영
-        return cls(**{f.name: data.get(f.name) for f in cls.__dataclass_fields__.values()})
 
 @dataclass
 class NoticeData:
