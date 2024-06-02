@@ -176,8 +176,12 @@ class Mgmt:
 
     def standard_read_personal(self):  # FK와 연동해서 자기 데이터 맞는지 검증 필요
         try:
-            self.id_data_result = (DB_class.Connect_to_DB(self.server)
-                              .add_sql(self.get_id_data_sql+f"AND {self.where}").execute().fetch().fetch_data)
+            if self.where is not None:
+                self.id_data_result = (DB_class.Connect_to_DB(self.server)
+                                  .add_sql(self.get_id_data_sql+f"AND {self.where}").execute().fetch().fetch_data)
+            else:
+                self.id_data_result = (DB_class.Connect_to_DB(self.server)
+                                  .add_sql(self.get_id_data_sql).execute().fetch().fetch_data)
 
             if not self.id_data_result:
                 raise PermissionError(f"No records found for {self.where} for {self.id}")
