@@ -28,21 +28,21 @@ class Mgmt:
 
         self.get_id_data_sql=f"""
                                    SELECT 
-                                       m.ID, m.Authority, m.Note,
-                                       r.ResidentId, r.Name AS ResidentName, r.FamilyRelationship, r.PhoneNumber AS ResidentPhoneNumber, r.Language AS ResidentLanguage, r.ResidencyStatus, r.ApprovalStatus,
-                                       c.ContractId, c.TenantName, c.PersonalId, c.Address, c.PhoneNumber AS ContractPhoneNumber, c.ContractStartDate, c.ContractEndDate, c.ContractRent,
-                                       h.UnitId, h.Location, h.RoomNumber, h.RentalArea, h.HousingType, h.StandardRent, h.ListingStatus,
-                                       b.BillId, b.BillDate, b.Rent AS BillRent, b.ManagementFee, b.WaterBill, b.ElectricityBill, b.GasBill,
-                                       u.UtilityType, u.MeasurementTime, u.MeasurementValue,
-                                       v.VehicleNumber, v.VehicleType, v.ParkingType
-                                   FROM Membership_data m
-                                   LEFT JOIN Resident_data r ON m.ResidentId = r.ResidentId
-                                   LEFT JOIN Contract_data c ON r.ContractId = c.ContractId
-                                   LEFT JOIN Houseinfo_data h ON c.UnitId = h.UnitId
-                                   LEFT JOIN Bill_data b ON c.ContractId = b.ContractId
-                                   LEFT JOIN UtilUsage_data u ON h.UnitId = u.UnitId
-                                   LEFT JOIN Vehicle_data v ON r.ResidentId = v.ResidentId
-                                   WHERE m.ID = '{self.id}'
+                                       Membership_data.ID, Membership_data.Authority, Membership_data.Note,
+                                       Resident_data.ResidentId, Resident_data.Name AS ResidentName, Resident_data.FamilyRelationship, Resident_data.PhoneNumber AS ResidentPhoneNumber, Resident_data.Language AS ResidentLanguage, Resident_data.ResidencyStatus, Resident_data.ApprovalStatus,
+                                       Contract_data.ContractId, Contract_data.TenantName, Contract_data.PersonalId, Contract_data.Address, Contract_data.PhoneNumber AS ContractPhoneNumber, Contract_data.ContractStartDate, Contract_data.ContractEndDate, Contract_data.ContractRent,
+                                       Houseinfo_data.UnitId, Houseinfo_data.Location, Houseinfo_data.RoomNumber, Houseinfo_data.RentalArea, Houseinfo_data.HousingType, Houseinfo_data.StandardRent, Houseinfo_data.ListingStatus,
+                                       Bill_data.BillId, Bill_data.BillDate, Bill_data.Rent AS BillRent, Bill_data.ManagementFee, Bill_data.WaterBill, Bill_data.ElectricityBill, Bill_data.GasBill,
+                                       UtilUsage_data.UtilityType, UtilUsage_data.MeasurementTime, UtilUsage_data.MeasurementValue,
+                                       Vehicle_data.VehicleNumber, Vehicle_data.VehicleType, Vehicle_data.ParkingType
+                                   FROM Membership_data
+                                   LEFT JOIN Resident_data ON Membership_data.ResidentId = Resident_data.ResidentId
+                                   LEFT JOIN Contract_data ON Resident_data.ContractId = Contract_data.ContractId
+                                   LEFT JOIN Houseinfo_data ON Contract_data.UnitId = Houseinfo_data.UnitId
+                                   LEFT JOIN Bill_data ON Contract_data.ContractId = Bill_data.ContractId
+                                   LEFT JOIN UtilUsage_data ON Houseinfo_data.UnitId = UtilUsage_data.UnitId
+                                   LEFT JOIN Vehicle_data ON Resident_data.ResidentId = Vehicle_data.ResidentId
+                                   WHERE Membership_data.ID = '{self.id}'
                                """
 
         try:
@@ -147,7 +147,7 @@ class Mgmt:
                     raise ValueError(f"Invalid entity: {entity}")
 
         except Exception as e:
-            self.server.app.logger.error(f"Failed to query the database: {e}")
+            self.serveResident_data.app.loggeResident_data.error(f"Failed to query the database: {e}")
             raise ConnectionError(f"Failed to query the database: {e}")
 
     def permission_check(self, need_permission):
@@ -184,7 +184,7 @@ class Mgmt:
             return self.id_data_result
 
         except Exception as e:
-            self.server.app.logger.error(f"Error in standard_read_personal: {e}")
+            self.serveResident_data.app.loggeResident_data.error(f"Error in standard_read_personal: {e}")
             raise RuntimeError(f"Failed to read data: {e}")
 
     def standard_read_all(self):
@@ -193,7 +193,7 @@ class Mgmt:
                               .execute().fetch().fetch_data)
 
         except Exception as e:
-            self.server.app.logger.error(f"Error in standard_read_ALL: {e}")
+            self.serveResident_data.app.loggeResident_data.error(f"Error in standard_read_ALL: {e}")
             raise RuntimeError(f"Failed to read data: {e}")
         return self.fetch_data
 
@@ -202,7 +202,7 @@ class Mgmt:
             self.fetch_data= (DB_class.Connect_to_DB(self.server).add_sql(f"SELECT * FROM {self.entity} WHERE {self.where};")
                               .execute().fetch().fetch_data)
         except Exception as e:
-            self.server.app.logger.error(f"Error in standard_read_where: {e}")
+            self.serveResident_data.app.loggeResident_data.error(f"Error in standard_read_where: {e}")
             raise RuntimeError(f"Failed to read data with where clause: {e}")
         return self.fetch_data
 
@@ -211,7 +211,7 @@ class Mgmt:
             self.fetch_data=(DB_class.Connect_to_DB(self.server).add_sql(f"SELECT * FROM {self.entity} WHERE {self.where};")
                               .execute().fetch().fetch_data)
         except Exception as e:
-            self.server.app.logger.error(f"Error in standard_read_opt: {e}")
+            self.serveResident_data.app.loggeResident_data.error(f"Error in standard_read_opt: {e}")
             raise RuntimeError(f"Failed to read data with options: {e}")
         return self.fetch_data
 
