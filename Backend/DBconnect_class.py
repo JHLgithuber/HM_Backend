@@ -62,3 +62,15 @@ class Connect_to_DB:
             raise RuntimeError(f"Failed to fetch data: {e}")
         return self
 
+    def get_row_count(self):  # SELECT할때 결과 가져옴
+        try:
+            self.cursor.execute(self.sql)
+            self.inserted_id = self.cursor.lastrowid
+            self.row_count = self.cursor.rowcount
+            self.server.app.logger.info(f"SQL 쿼리 실행됨\tinserted_id: {self.inserted_id}\trow_count: {self.row_count}\n SQL: {self.sql}")
+        except pymysql.MySQLError as e:
+            self.server.app.logger.error(f"SQL 실행 오류: {e}")
+            raise RuntimeError(f"Failed to execute SQL query: {e}")
+        return self.row_count
+
+

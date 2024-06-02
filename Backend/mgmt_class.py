@@ -13,18 +13,43 @@ class Mgmt:
         self.permission = permission
 
         self.result_entity_instance_list =[]
+        self.entity_class_map = {
+            'Houseinfo_data': entity_class.HouseInfoData,
+            'Contract_data': entity_class.ContractData,
+            'Bill_data': entity_class.BillData,
+            'UtilUsage_data': entity_class.UtilUsageData,
+            'Resident_data': entity_class.ResidentData,
+            'Vehicle_data': entity_class.VehicleData,
+            'Membership_data': entity_class.MembershipData,
+            'Notice_data': entity_class.NoticeData
+        }
+        self.entity_class_type = self.entity_class_map[self.entity]
+        self.admin_permission=["admin","root","Landlord"]
+
+        self.get_id_data_sql=f"""
+                                   SELECT 
+                                       m.ID, m.Authority, m.Note,
+                                       r.ResidentId, r.Name AS ResidentName, r.FamilyRelationship, r.PhoneNumber AS ResidentPhoneNumber, r.Language AS ResidentLanguage, r.ResidencyStatus, r.ApprovalStatus,
+                                       c.ContractId, c.TenantName, c.PersonalId, c.Address, c.PhoneNumber AS ContractPhoneNumber, c.ContractStartDate, c.ContractEndDate, c.ContractRent,
+                                       h.UnitId, h.Location, h.RoomNumber, h.RentalArea, h.HousingType, h.StandardRent, h.ListingStatus,
+                                       b.BillId, b.BillDate, b.Rent AS BillRent, b.ManagementFee, b.WaterBill, b.ElectricityBill, b.GasBill,
+                                       u.UtilityType, u.MeasurementTime, u.MeasurementValue,
+                                       v.VehicleNumber, v.VehicleType, v.ParkingType
+                                   FROM Membership_data m
+                                   LEFT JOIN Resident_data r ON m.ResidentId = r.ResidentId
+                                   LEFT JOIN Contract_data c ON r.ContractId = c.ContractId
+                                   LEFT JOIN Houseinfo_data h ON c.UnitId = h.UnitId
+                                   LEFT JOIN Bill_data b ON c.ContractId = b.ContractId
+                                   LEFT JOIN UtilUsage_data u ON h.UnitId = u.UnitId
+                                   LEFT JOIN Vehicle_data v ON r.ResidentId = v.ResidentId
+                                   WHERE m.ID = '{self.id}'
+                               """
 
         try:
             match entity:
                 case 'Houseinfo_data':
                     if curd == 'read':
-                        if where is not None:
-                            for result_item_in_list in self.standard_read_where():
-                                self.result_entity_instance_list.append(entity_class.HouseInfoData.from_dict(result_item_in_list))
-                        else:
-                            for result_item_in_list in self.standard_read_all():
-                                self.result_entity_instance_list.append(entity_class.HouseInfoData.from_dict(result_item_in_list))
-
+                        self.standard_read()
                     elif curd == 'create':
                         pass
                     elif curd == 'update':
@@ -36,7 +61,7 @@ class Mgmt:
 
                 case 'Contract_data':
                     if curd == 'read':
-                        pass
+                        self.standard_read()
                     elif curd == 'create':
                         pass
                     elif curd == 'update':
@@ -48,7 +73,7 @@ class Mgmt:
 
                 case 'Bill_data':
                     if curd == 'read':
-                        pass
+                        self.standard_read()
                     elif curd == 'create':
                         pass
                     elif curd == 'update':
@@ -60,7 +85,7 @@ class Mgmt:
 
                 case 'UtilUsage_data':
                     if curd == 'read':
-                        pass
+                        self.standard_read()
                     elif curd == 'create':
                         pass
                     elif curd == 'update':
@@ -72,7 +97,7 @@ class Mgmt:
 
                 case 'Resident_data':
                     if curd == 'read':
-                        pass
+                        self.standard_read()
                     elif curd == 'create':
                         pass
                     elif curd == 'update':
@@ -84,7 +109,7 @@ class Mgmt:
 
                 case 'Vehicle_data':
                     if curd == 'read':
-                        self.standard_read_all()
+                        self.standard_read()
                     elif curd == 'create':
                         pass
                     elif curd == 'update':
@@ -96,7 +121,7 @@ class Mgmt:
 
                 case 'Membership_data':
                     if curd == 'read':
-                        pass
+                        self.standard_read()
                     elif curd == 'create':
                         pass
                     elif curd == 'update':
@@ -108,7 +133,7 @@ class Mgmt:
 
                 case 'Notice_data':
                     if curd == 'read':
-                        pass
+                        self.standard_read()
                     elif curd == 'create':
                         pass
                     elif curd == 'update':
@@ -129,6 +154,38 @@ class Mgmt:
         if self.permission not in need_permission:
             raise PermissionError(f"{self.permission} is not in {need_permission}")
 
+    def standard_read(self):
+        if self.option is not None:
+            match self.option:
+                case 'personal':
+                    for result_item_in_list in self.standard_read_personal():
+                        self.result_entity_instance_list.append(
+                            self.entity_class_type.from_dict(result_item_in_list))
+
+        elif self.where is not None:
+            self.permission_check(self.admin_permission)
+            for result_item_in_list in self.standard_read_where():
+                self.result_entity_instance_list.append(
+                    self.entity_class_type.from_dict(result_item_in_list))
+
+        else:  # 관리자만 전체검색 가능
+            self.permission_check(self.admin_permission)
+            for result_item_in_list in self.standard_read_all():
+                self.result_entity_instance_list.append(
+                    self.entity_class_type.from_dict(result_item_in_list))
+
+    def standard_read_personal(self):  # FK와 연동해서 자기 데이터 맞는지 검증 필요
+        try:
+            self.id_data_result = (DB_class.Connect_to_DB(self.server)
+                              .add_sql(self.get_id_data_sql+f"AND {self.where}").execute().fetch().fetch_data)
+
+            if not self.id_data_result:
+                raise PermissionError(f"No records found for {self.where} for {self.id}")
+            return self.id_data_result
+
+        except Exception as e:
+            self.server.app.logger.error(f"Error in standard_read_personal: {e}")
+            raise RuntimeError(f"Failed to read data: {e}")
 
     def standard_read_all(self):
         try:
