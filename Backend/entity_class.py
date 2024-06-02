@@ -39,7 +39,7 @@ class HouseInfoData(FunctionOfEntity):
 
 
 @dataclass
-class ContractData:
+class ContractData(FunctionOfEntity):
     ContractId: str  # 계약관리번호 (UUID, PK)
     UnitId: Optional[str] = None  # 세대번호 (FK - HouseinfoData.UnitId)
     TenantName: Optional[str] = None  # 임차인 성명
@@ -67,7 +67,7 @@ class ContractData:
     MoveOutRemarks: Optional[str] = None  # 퇴실비고
 
 @dataclass
-class BillData:
+class BillData(FunctionOfEntity):
     BillId: str  # 청구관리번호 (UUID, PK)
     ContractId: Optional[str] = None  # 계약관리번호 (FK - ContractData.ContractId)
     BillDate: Optional[datetime] = None  # 청구일
@@ -91,14 +91,14 @@ class BillData:
     AIComment: Optional[str] = None  # AI 코멘트
 
 @dataclass
-class UtilUsageData:
+class UtilUsageData(FunctionOfEntity):
     MeasurementTime: datetime  # 계량시각 (PK)
     UnitId: str  # 세대번호 (PK, FK - HouseinfoData.UnitId)
     UtilityType: str  # 계량대상 (PK)
     MeasurementValue: Optional[float] = None  # 계량값
 
 @dataclass
-class ResidentData:
+class ResidentData(FunctionOfEntity):
     ResidentId: str  # 주민관리번호 (UUID, PK)
     ContractId: Optional[str] = None  # 계약관리번호 (FK - ContractData.ContractId)
     Name: Optional[str] = None  # 성명
@@ -109,7 +109,7 @@ class ResidentData:
     ApprovalStatus: Optional[bool] = None  # 승인상태
 
 @dataclass
-class VehicleData:
+class VehicleData(FunctionOfEntity):
     VehicleNumber: str  # 차량번호 (PK)
     ContractId: Optional[str] = None  # 계약관리번호 (FK - ContractData.ContractId)
     ResidentId: Optional[str] = None  # 주민관리번호 (FK - ResidentData.ResidentId)
@@ -127,7 +127,7 @@ class MembershipData(FunctionOfEntity):
 
 
 @dataclass
-class NoticeData:
+class NoticeData(FunctionOfEntity):
     NoticeId: str  # 공지번호 (UUID, PK)
     AuthorId: Optional[str] = None  # 작성자 (FK - MembershipData.ID)
     Content: Optional[str] = None  # 내용

@@ -25,7 +25,7 @@ class login:
         try:
             self.result=entity_class.MembershipData.from_dict(DB_class.Connect_to_DB(self.server)
                               .add_sql(f"SELECT PasswordHash,Authority FROM Membership_data WHERE ID = '{self.username}';")
-                              .execute().fetch().fetch_data)
+                              .execute().fetch().fetch_data[0])
 
         except Exception as e:
              # 다른 예외가 발생했을 때 실행할 코드

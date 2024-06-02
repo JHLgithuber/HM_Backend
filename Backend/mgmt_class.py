@@ -12,17 +12,16 @@ class Mgmt:
         self.server = server
         self.permission = permission
 
-        self.result_entity_instance_list =None
+        self.result_entity_instance_list =[]
 
         try:
             match entity:
                 case 'Houseinfo_data':
                     if curd == 'read':
                         if where is not None:
-                            self.result_entity_instance_list = [entity_class.HouseInfoData.from_dict(self.standard_read_where())]
-
+                            for result_item_in_list in self.standard_read_where():
+                                self.result_entity_instance_list.append(entity_class.HouseInfoData.from_dict(result_item_in_list))
                         else:
-                            self.result_entity_instance_list=[]
                             for result_item_in_list in self.standard_read_all():
                                 self.result_entity_instance_list.append(entity_class.HouseInfoData.from_dict(result_item_in_list))
 
@@ -134,7 +133,7 @@ class Mgmt:
     def standard_read_all(self):
         try:
             self.fetch_data = (DB_class.Connect_to_DB(self.server).add_sql(f"SELECT * FROM {self.entity};")
-                           .execute().fetch().fetch_data)
+                              .execute().fetch().fetch_data)
 
         except Exception as e:
             self.server.app.logger.error(f"Error in standard_read_ALL: {e}")
@@ -143,7 +142,7 @@ class Mgmt:
 
     def standard_read_where (self):
         try:
-            self.fetch_data=(DB_class.Connect_to_DB(self.server).add_sql(f"SELECT * FROM {self.entity} WHERE {self.where};")
+            self.fetch_data= (DB_class.Connect_to_DB(self.server).add_sql(f"SELECT * FROM {self.entity} WHERE {self.where};")
                               .execute().fetch().fetch_data)
         except Exception as e:
             self.server.app.logger.error(f"Error in standard_read_where: {e}")
