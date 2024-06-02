@@ -8,6 +8,7 @@ from flask_jwt_extended import (
 from dotenv import load_dotenv
 import ssl
 import os
+import secrets
 
 
 import Backend.mgmt_class as mgmt_class
@@ -26,8 +27,9 @@ class Connect_to_Frontend:
         self.app.logger.setLevel(logging.INFO)
         self.app.logger.info('서버 시작됨')
 
+        #print(secrets.token_urlsafe(4096))
         # JWT 설정
-        self.app.config['JWT_SECRET_KEY'] = "your_jwt_secret_key"  # 환경 변수로 대체하는 것이 좋습니다.
+        self.app.config['JWT_SECRET_KEY'] = secrets.token_urlsafe(4096) #서버 시작때마다 난수 시크릿키 생성
         self.jwt = JWTManager(self.app)
 
         self.register_routes()
