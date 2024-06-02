@@ -27,14 +27,8 @@ class Mgmt:
         self.admin_permission=["admin","root","Landlord"]
 
         self.get_id_data_sql=f"""
-                                   SELECT 
-                                       Membership_data.ID, Membership_data.Authority, Membership_data.Note,
-                                       Resident_data.ResidentId, Resident_data.Name AS ResidentName, Resident_data.FamilyRelationship, Resident_data.PhoneNumber AS ResidentPhoneNumber, Resident_data.Language AS ResidentLanguage, Resident_data.ResidencyStatus, Resident_data.ApprovalStatus,
-                                       Contract_data.ContractId, Contract_data.TenantName, Contract_data.PersonalId, Contract_data.Address, Contract_data.PhoneNumber AS ContractPhoneNumber, Contract_data.ContractStartDate, Contract_data.ContractEndDate, Contract_data.ContractRent,
-                                       Houseinfo_data.UnitId, Houseinfo_data.Location, Houseinfo_data.RoomNumber, Houseinfo_data.RentalArea, Houseinfo_data.HousingType, Houseinfo_data.StandardRent, Houseinfo_data.ListingStatus,
-                                       Bill_data.BillId, Bill_data.BillDate, Bill_data.Rent AS BillRent, Bill_data.ManagementFee, Bill_data.WaterBill, Bill_data.ElectricityBill, Bill_data.GasBill,
-                                       UtilUsage_data.UtilityType, UtilUsage_data.MeasurementTime, UtilUsage_data.MeasurementValue,
-                                       Vehicle_data.VehicleNumber, Vehicle_data.VehicleType, Vehicle_data.ParkingType
+                                   SELECT DISTINCT
+                                   {entity}.*
                                    FROM Membership_data
                                    LEFT JOIN Resident_data ON Membership_data.ResidentId = Resident_data.ResidentId
                                    LEFT JOIN Contract_data ON Resident_data.ContractId = Contract_data.ContractId
