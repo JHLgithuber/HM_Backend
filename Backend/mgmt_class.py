@@ -51,11 +51,11 @@ class Mgmt:
                     if curd == 'read':
                         self.checking_standard_read()
                     elif curd == 'create':
-                        pass
+                        self.standard_create()
                     elif curd == 'update':
                         self.standard_update_only_where()
                     elif curd == 'delete':
-                        pass
+                        self.standard_delete()
                     else:
                         raise ValueError(f"Invalid curd operation: {curd}")
 
@@ -63,11 +63,11 @@ class Mgmt:
                     if curd == 'read':
                         self.checking_standard_read()
                     elif curd == 'create':
-                        pass
+                        self.standard_create()
                     elif curd == 'update':
                         self.standard_update_only_where()
                     elif curd == 'delete':
-                        pass
+                        self.standard_delete()
                     else:
                         raise ValueError(f"Invalid curd operation: {curd}")
 
@@ -75,11 +75,11 @@ class Mgmt:
                     if curd == 'read':
                         self.checking_standard_read()
                     elif curd == 'create':
-                        pass
+                        self.standard_create()
                     elif curd == 'update':
                         self.standard_update_only_where()
                     elif curd == 'delete':
-                        pass
+                        self.standard_delete()
                     else:
                         raise ValueError(f"Invalid curd operation: {curd}")
 
@@ -87,11 +87,11 @@ class Mgmt:
                     if curd == 'read':
                         self.checking_standard_read()
                     elif curd == 'create':
-                        pass
+                        self.standard_create()
                     elif curd == 'update':
                         self.standard_update_only_where()
                     elif curd == 'delete':
-                        pass
+                        self.standard_delete()
                     else:
                         raise ValueError(f"Invalid curd operation: {curd}")
 
@@ -99,11 +99,11 @@ class Mgmt:
                     if curd == 'read':
                         self.checking_standard_read()
                     elif curd == 'create':
-                        pass
+                        self.standard_create()
                     elif curd == 'update':
                         self.standard_update_only_where()
                     elif curd == 'delete':
-                        pass
+                        self.standard_delete()
                     else:
                         raise ValueError(f"Invalid curd operation: {curd}")
 
@@ -111,11 +111,11 @@ class Mgmt:
                     if curd == 'read':
                         self.checking_standard_read()
                     elif curd == 'create':
-                        pass
+                        self.standard_create()
                     elif curd == 'update':
                         self.standard_update_only_where()
                     elif curd == 'delete':
-                        pass
+                        self.standard_delete()
                     else:
                         raise ValueError(f"Invalid curd operation: {curd}")
 
@@ -123,11 +123,11 @@ class Mgmt:
                     if curd == 'read':
                         self.checking_standard_read()
                     elif curd == 'create':
-                        pass
+                        self.standard_create()
                     elif curd == 'update':
                         self.standard_update_only_where()
                     elif curd == 'delete':
-                        pass
+                        self.standard_delete()
                     else:
                         raise ValueError(f"Invalid curd operation: {curd}")
 
@@ -135,11 +135,11 @@ class Mgmt:
                     if curd == 'read':
                         self.checking_standard_read()
                     elif curd == 'create':
-                        pass
+                        self.standard_create()
                     elif curd == 'update':
                         self.standard_update_only_where()
                     elif curd == 'delete':
-                        pass
+                        self.standard_delete()
                     else:
                         raise ValueError(f"Invalid curd operation: {curd}")
 
@@ -258,8 +258,15 @@ class Mgmt:
 
 
 
-    def standard_delete_opt(self):
-        pass
+    def standard_delete(self):
+        try:
+            self.fetch_data= (DB_class.Connect_to_DB(self.server)
+                              .add_sql(f"DELETE FROM {self.entity} WHERE {self.where};")
+                              .execute().fetch().fetch_data)
+        except Exception as e:
+            self.server.app.loggeResident_data.error(f"Error in standard_read_where: {e}")
+            raise RuntimeError(f"Failed to read data with where clause: {e}")
+        return self.fetch_data
 
     def get_result_entity_instance_list(self):
         return self.result_entity_instance_list
