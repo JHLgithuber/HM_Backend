@@ -16,4 +16,4 @@ COPY . .
 EXPOSE 5000
 
 # 컨테이너 실행 시 시작할 명령어 설정
-CMD ["python", "run.py"]
+CMD ["python", "run_unsecu.py"]

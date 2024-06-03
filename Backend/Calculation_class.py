@@ -7,7 +7,7 @@ class Calculation:
 
     def fetch_data(self, user_id, name_of_data):
         # mgmt_class를 사용하여 데이터베이스에서 데이터를 가져옴
-        mgmt_instance = mgmt_class.Mgmt(user_id, 'read', name_of_data, None, None, self.server, 'required_permission')
+        mgmt_instance = mgmt_class.Mgmt(id=user_id, curd='read', entity=name_of_data, where=None, option=None, server=self.server, permission='required_permission')
         data = mgmt_instance.standard_read_ALL().result
         return data
 

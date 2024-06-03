@@ -2,10 +2,16 @@ import Backend.DBconnect_class as DB_class
 import Backend.entity_class as entity_class
 
 class Mgmt:
-    def __init__(self, id, curd, entity, where, option, data, server, permission):
+    def __init__(self, id, curd, entity, server, permission, property='*', where=None, option=None, data=None):
+
+        if property is None:
+            self.property = '*'
+        else:
+            self.property = property
         self.id = id
         self.curd = curd
         self.entity = entity
+
         self.where = where
         self.option = option
         self.data = data
@@ -28,7 +34,7 @@ class Mgmt:
 
         self.get_id_data_sql=f"""
                                    SELECT DISTINCT
-                                   {entity}.*
+                                   {self.entity}.{self.property}
                                    FROM Membership_data
                                    LEFT JOIN Resident_data ON Membership_data.ResidentId = Resident_data.ResidentId
                                    LEFT JOIN Contract_data ON Resident_data.ContractId = Contract_data.ContractId
@@ -43,11 +49,11 @@ class Mgmt:
             match entity:
                 case 'Houseinfo_data':
                     if curd == 'read':
-                        self.standard_read()
+                        self.checking_standard_read()
                     elif curd == 'create':
                         pass
                     elif curd == 'update':
-                        pass
+                        self.standard_update_only_where()
                     elif curd == 'delete':
                         pass
                     else:
@@ -55,11 +61,11 @@ class Mgmt:
 
                 case 'Contract_data':
                     if curd == 'read':
-                        self.standard_read()
+                        self.checking_standard_read()
                     elif curd == 'create':
                         pass
                     elif curd == 'update':
-                        pass
+                        self.standard_update_only_where()
                     elif curd == 'delete':
                         pass
                     else:
@@ -67,11 +73,11 @@ class Mgmt:
 
                 case 'Bill_data':
                     if curd == 'read':
-                        self.standard_read()
+                        self.checking_standard_read()
                     elif curd == 'create':
                         pass
                     elif curd == 'update':
-                        pass
+                        self.standard_update_only_where()
                     elif curd == 'delete':
                         pass
                     else:
@@ -79,11 +85,11 @@ class Mgmt:
 
                 case 'UtilUsage_data':
                     if curd == 'read':
-                        self.standard_read()
+                        self.checking_standard_read()
                     elif curd == 'create':
                         pass
                     elif curd == 'update':
-                        pass
+                        self.standard_update_only_where()
                     elif curd == 'delete':
                         pass
                     else:
@@ -91,11 +97,11 @@ class Mgmt:
 
                 case 'Resident_data':
                     if curd == 'read':
-                        self.standard_read()
+                        self.checking_standard_read()
                     elif curd == 'create':
                         pass
                     elif curd == 'update':
-                        pass
+                        self.standard_update_only_where()
                     elif curd == 'delete':
                         pass
                     else:
@@ -103,11 +109,11 @@ class Mgmt:
 
                 case 'Vehicle_data':
                     if curd == 'read':
-                        self.standard_read()
+                        self.checking_standard_read()
                     elif curd == 'create':
                         pass
                     elif curd == 'update':
-                        pass
+                        self.standard_update_only_where()
                     elif curd == 'delete':
                         pass
                     else:
@@ -115,11 +121,11 @@ class Mgmt:
 
                 case 'Membership_data':
                     if curd == 'read':
-                        self.standard_read()
+                        self.checking_standard_read()
                     elif curd == 'create':
                         pass
                     elif curd == 'update':
-                        pass
+                        self.standard_update_only_where()
                     elif curd == 'delete':
                         pass
                     else:
@@ -127,11 +133,11 @@ class Mgmt:
 
                 case 'Notice_data':
                     if curd == 'read':
-                        self.standard_read()
+                        self.checking_standard_read()
                     elif curd == 'create':
                         pass
                     elif curd == 'update':
-                        pass
+                        self.standard_update_only_where()
                     elif curd == 'delete':
                         pass
                     else:
@@ -141,14 +147,14 @@ class Mgmt:
                     raise ValueError(f"Invalid entity: {entity}")
 
         except Exception as e:
-            self.serveResident_data.app.loggeResident_data.error(f"Failed to query the database: {e}")
+            self.server.app.loggeResident_data.error(f"Failed to query the database: {e}")
             raise ConnectionError(f"Failed to query the database: {e}")
 
     def permission_check(self, need_permission):
         if self.permission not in need_permission:
             raise PermissionError(f"{self.permission} is not in {need_permission}")
 
-    def standard_read(self):
+    def checking_standard_read(self):
         if self.option is not None:
             match self.option:
                 case 'personal':
@@ -182,42 +188,75 @@ class Mgmt:
             return self.id_data_result
 
         except Exception as e:
-            self.serveResident_data.app.loggeResident_data.error(f"Error in standard_read_personal: {e}")
+            self.server.app.loggeResident_data.error(f"Error in standard_read_personal: {e}")
             raise RuntimeError(f"Failed to read data: {e}")
 
     def standard_read_all(self):
         try:
-            self.fetch_data = (DB_class.Connect_to_DB(self.server).add_sql(f"SELECT * FROM {self.entity};")
+            self.fetch_data = (DB_class.Connect_to_DB(self.server).add_sql(f"SELECT {self.property} FROM {self.entity};")
                               .execute().fetch().fetch_data)
 
         except Exception as e:
-            self.serveResident_data.app.loggeResident_data.error(f"Error in standard_read_ALL: {e}")
+            self.server.app.loggeResident_data.error(f"Error in standard_read_ALL: {e}")
             raise RuntimeError(f"Failed to read data: {e}")
         return self.fetch_data
 
     def standard_read_where (self):
         try:
-            self.fetch_data= (DB_class.Connect_to_DB(self.server).add_sql(f"SELECT * FROM {self.entity} WHERE {self.where};")
+            self.fetch_data= (DB_class.Connect_to_DB(self.server).add_sql(f"SELECT {self.property} FROM {self.entity} WHERE {self.where};")
                               .execute().fetch().fetch_data)
         except Exception as e:
-            self.serveResident_data.app.loggeResident_data.error(f"Error in standard_read_where: {e}")
+            self.server.app.loggeResident_data.error(f"Error in standard_read_where: {e}")
             raise RuntimeError(f"Failed to read data with where clause: {e}")
         return self.fetch_data
 
     def standard_read_opt(self): # 특수 옵션 적용
         try:
-            self.fetch_data=(DB_class.Connect_to_DB(self.server).add_sql(f"SELECT * FROM {self.entity} WHERE {self.where};")
+            self.fetch_data=(DB_class.Connect_to_DB(self.server).add_sql(f"SELECT {self.property} FROM {self.entity} WHERE {self.where};")
                               .execute().fetch().fetch_data)
         except Exception as e:
-            self.serveResident_data.app.loggeResident_data.error(f"Error in standard_read_opt: {e}")
+            self.server.app.loggeResident_data.error(f"Error in standard_read_opt: {e}")
             raise RuntimeError(f"Failed to read data with options: {e}")
         return self.fetch_data
 
-    def standard_create_opt(self):
-        pass
+    def standard_create(self):
+        try:
+            self.fetch_data=(DB_class.Connect_to_DB(self.server).add_sql(f"INSERT INTO {self.entity} {self.property} VALUES {self.data};")
+                              .execute().fetch().fetch_data)
+        except Exception as e:
+            self.server.app.loggeResident_data.error(f"Error in standard_read_opt: {e}")
+            raise RuntimeError(f"Failed to read data with options: {e}")
+        return self.fetch_data
 
-    def standard_update_opt(self):
-        pass
+
+    def standard_update_personal(self): #수정필요
+        try:
+            if self.where is not None:
+                self.id_data_result = (DB_class.Connect_to_DB(self.server)
+                                  .add_sql(self.get_id_data_sql+f"AND {self.where}").execute().fetch().fetch_data)
+            else:
+                self.id_data_result = (DB_class.Connect_to_DB(self.server)
+                                  .add_sql(self.get_id_data_sql).execute().fetch().fetch_data)
+
+            if not self.id_data_result:
+                raise PermissionError(f"No records found for {self.where} for {self.id}")
+            return self.id_data_result
+
+        except Exception as e:
+            self.server.app.loggeResident_data.error(f"Error in standard_read_personal: {e}")
+            raise RuntimeError(f"Failed to read data: {e}")
+
+    def standard_update_only_where(self):
+        try:
+            self.fetch_data= (DB_class.Connect_to_DB(self.server)
+                              .add_sql(f"UPDATE {self.entity} SET {self.data} WHERE {self.where};")
+                              .execute().fetch().fetch_data)
+        except Exception as e:
+            self.server.app.loggeResident_data.error(f"Error in standard_read_where: {e}")
+            raise RuntimeError(f"Failed to read data with where clause: {e}")
+        return self.fetch_data
+
+
 
     def standard_delete_opt(self):
         pass

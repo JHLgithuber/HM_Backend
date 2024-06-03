@@ -140,13 +140,14 @@ class Connect_to_Frontend:
             # JWT 토큰 검증 및 클레임 추출
             jwd_checked_data = self.jwt_checked(message.get('access_token'))
 
+            response_data_from_result_entity_instance_list=[]
             try:
                 response_data_from_result_entity_instance_list = mgmt_class.Mgmt(
                                                 id=jwd_checked_data['user_identity'], curd=curd,
                                                 entity=message.get('entity'), where=message.get('where'),
-                                                option=message.get('option'), data=message.get('data'), server=self,
+                                                option=message.get('option'), property=message.get('property'), data=message.get('data'), server=self,
                                                 permission=jwd_checked_data['permission']).get_result_entity_instance_list()  # DB자료 없을때 예외처리 필요
-                print("\nresponse_data_from_result_entity_instance_list\t",response_data_from_result_entity_instance_list)
+                #print("\nresponse_data_from_result_entity_instance_list\t",response_data_from_result_entity_instance_list)
             except Exception as e:
                 self.app.logger.error(f"Error mgmt data in DB: {e}")
 
@@ -172,7 +173,7 @@ class Connect_to_Frontend:
                     return obj.isoformat()
                 return obj
 
-            print("\njson_data\t",json_data)
+            #print("\njson_data\t",json_data)
 
             response_data_to_frontend=json.dumps({
                 "JSON_DATA": convert_dates(json_data)
