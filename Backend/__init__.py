@@ -188,6 +188,7 @@ class Connect_to_Frontend:
             #print("\njson_data\t",json_data)
 
             response_data_to_frontend=json.dumps({
+
                 "JSON_DATA": convert_dates(json_data)
             }, indent=4)
 
