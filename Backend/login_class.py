@@ -54,10 +54,10 @@ class login:
 
     def make_token(self):
         self.access_token = create_access_token(identity=self.username, additional_claims={"permission": self.permission})
-        self.refresh_token = create_refresh_token(identity=self.username)
+        self.refresh_token = create_refresh_token(identity=self.username, additional_claims={"permission": self.permission})
         self.server.app.logger.info(f"access_token: {self.access_token}, refresh_token: {self.refresh_token}")
         return self
-
+"""
     @staticmethod
     @jwt_required()
     def protected(self, access_token):
@@ -71,5 +71,6 @@ class login:
     @jwt_required(refresh=True)
     def refresh(self):
         self.username = get_jwt_identity()
-        self.access_token = self.server.create_access_token(identity=self.username)
+        self.access_token = self.server.create_access_token(identity=self.username, additional_claims={"permission": self.permission})
         return self
+"""

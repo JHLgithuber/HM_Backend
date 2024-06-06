@@ -3,14 +3,13 @@ import logging
 from flask import Flask, render_template, jsonify, request
 from flask_socketio import SocketIO
 from flask_jwt_extended import (
-    JWTManager, jwt_required, create_access_token, get_jwt_identity, get_jwt, unset_jwt_cookies, create_refresh_token
+    JWTManager, jwt_required, create_access_token, get_jwt_identity, get_jwt, unset_jwt_cookies, create_refresh_token, verify_jwt_in_request
 )
 from dotenv import load_dotenv
 import ssl
 import os
 import secrets
-from datetime import date, datetime
-
+from datetime import date, datetime, timedelta
 
 import Backend.mgmt_class as mgmt_class
 import Backend.login_class as login_class
@@ -30,7 +29,9 @@ class Connect_to_Frontend:
 
         #print(secrets.token_urlsafe(1024))
         # JWT 설정
-        self.app.config['JWT_SECRET_KEY'] = secrets.token_urlsafe(1024) #서버 시작때마다 난수 시크릿키 생성
+        self.app.config['JWT_SECRET_KEY'] = "secretkey"#secrets.token_urlsafe(1024) #서버 시작때마다 난수 시크릿키 생성
+        self.app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(minutes=1)
+        self.app.config['JWT_REFRESH_TOKEN_EXPIRES'] = timedelta(days=30)
         self.jwt = JWTManager(self.app)
 
         self.register_routes()
@@ -85,29 +86,36 @@ class Connect_to_Frontend:
             else:
                 return jsonify({"msg": "Bad username or password"}), 401
 
-        @self.app.route('/protected', methods=['GET'])
+        @self.app.route('/protected', methods=['POST'])
         @jwt_required()
         def protected():
             current_user = get_jwt_identity()
             permission = get_jwt().get('permission', None)
             return jsonify(logged_in_as=current_user, permission=permission), 200
 
-        @self.app.route('/refresh', methods=['GET'])
+        @self.app.route('/refresh', methods=['POST'])
         @jwt_required(refresh=True)
         def refresh():
+            self.app.logger.info(f"request refreshed jwt")
+            #verify_jwt_in_request(refresh=True)
             current_user = get_jwt_identity()
-            access_token = create_access_token(identity=current_user)
+            refresh_token = request.headers.get('Authorization')
+            self.app.logger.info(f"refresh_token: {refresh_token}, current_user: {current_user}")
+
+            permission = get_jwt().get('permission', None)
+            #access_token = create_access_token(identity=current_user)
+            access_token = create_access_token(identity=current_user, additional_claims={"permission": permission})
             return jsonify(access_token=access_token, current_user=current_user)
 
-    def jwt_checked(self, access_token):
-        if access_token:
+    def jwt_checked(self,token):
+        if token:
             with self.app.app_context():
                 user_identity = None
                 permission = None
                 try:
                     # 임시 요청 컨텍스트를 만들어 JWT 토큰에서 클레임 추출
                     from flask_jwt_extended import decode_token
-                    decoded_token = decode_token(access_token)
+                    decoded_token = decode_token(token)
                     user_identity = decoded_token['sub']
                     permission = decoded_token['permission']
                 except Exception as e:
@@ -139,6 +147,10 @@ class Connect_to_Frontend:
 
             # JWT 토큰 검증 및 클레임 추출
             jwd_checked_data = self.jwt_checked(message.get('access_token'))
+            if jwd_checked_data.get('identity') is None and jwd_checked_data.get('permission') is None: #jwt 토큰검증 실패
+                self.socketio.emit('error_data', "Signature has expired", to=sid)
+                self.app.logger.info(f"error_info: Signature has expired message to {sid}")
+
 
             response_data_from_result_entity_instance_list=[]
             try:

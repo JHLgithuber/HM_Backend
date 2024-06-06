@@ -147,7 +147,7 @@ class Mgmt:
                     raise ValueError(f"Invalid entity: {entity}")
 
         except Exception as e:
-            self.server.app.loggeResident_data.error(f"Failed to query the database: {e}")
+            self.server.app.logger.error(f"Failed to query the database: {e}")
             raise ConnectionError(f"Failed to query the database: {e}")
 
     def permission_check(self, need_permission):
@@ -188,7 +188,7 @@ class Mgmt:
             return self.id_data_result
 
         except Exception as e:
-            self.server.app.loggeResident_data.error(f"Error in standard_read_personal: {e}")
+            self.server.app.logger.error(f"Error in standard_read_personal: {e}")
             raise RuntimeError(f"Failed to read data: {e}")
 
     def standard_read_all(self):
@@ -197,7 +197,7 @@ class Mgmt:
                               .execute().fetch().fetch_data)
 
         except Exception as e:
-            self.server.app.loggeResident_data.error(f"Error in standard_read_ALL: {e}")
+            self.server.app.logger.error(f"Error in standard_read_ALL: {e}")
             raise RuntimeError(f"Failed to read data: {e}")
         return self.fetch_data
 
@@ -206,7 +206,7 @@ class Mgmt:
             self.fetch_data= (DB_class.Connect_to_DB(self.server).add_sql(f"SELECT {self.property} FROM {self.entity} WHERE {self.where};")
                               .execute().fetch().fetch_data)
         except Exception as e:
-            self.server.app.loggeResident_data.error(f"Error in standard_read_where: {e}")
+            self.server.app.logger.error(f"Error in standard_read_where: {e}")
             raise RuntimeError(f"Failed to read data with where clause: {e}")
         return self.fetch_data
 
@@ -215,7 +215,7 @@ class Mgmt:
             self.fetch_data=(DB_class.Connect_to_DB(self.server).add_sql(f"SELECT {self.property} FROM {self.entity} WHERE {self.where};")
                               .execute().fetch().fetch_data)
         except Exception as e:
-            self.server.app.loggeResident_data.error(f"Error in standard_read_opt: {e}")
+            self.server.app.logger.error(f"Error in standard_read_opt: {e}")
             raise RuntimeError(f"Failed to read data with options: {e}")
         return self.fetch_data
 
@@ -224,7 +224,7 @@ class Mgmt:
             self.fetch_data=(DB_class.Connect_to_DB(self.server).add_sql(f"INSERT INTO {self.entity} {self.property} VALUES {self.data};")
                               .execute().fetch().fetch_data)
         except Exception as e:
-            self.server.app.loggeResident_data.error(f"Error in standard_read_opt: {e}")
+            self.server.app.logger.error(f"Error in standard_read_opt: {e}")
             raise RuntimeError(f"Failed to read data with options: {e}")
         return self.fetch_data
 
@@ -243,7 +243,7 @@ class Mgmt:
             return self.id_data_result
 
         except Exception as e:
-            self.server.app.loggeResident_data.error(f"Error in standard_read_personal: {e}")
+            self.server.app.logger.error(f"Error in standard_read_personal: {e}")
             raise RuntimeError(f"Failed to read data: {e}")
 
     def standard_update_only_where(self):
@@ -252,7 +252,7 @@ class Mgmt:
                               .add_sql(f"UPDATE {self.entity} SET {self.data} WHERE {self.where};")
                               .execute().fetch().fetch_data)
         except Exception as e:
-            self.server.app.loggeResident_data.error(f"Error in standard_read_where: {e}")
+            self.server.app.logger.error(f"Error in standard_read_where: {e}")
             raise RuntimeError(f"Failed to read data with where clause: {e}")
         return self.fetch_data
 
@@ -264,7 +264,7 @@ class Mgmt:
                               .add_sql(f"DELETE FROM {self.entity} WHERE {self.where};")
                               .execute().fetch().fetch_data)
         except Exception as e:
-            self.server.app.loggeResident_data.error(f"Error in standard_read_where: {e}")
+            self.server.app.logger.error(f"Error in standard_read_where: {e}")
             raise RuntimeError(f"Failed to read data with where clause: {e}")
         return self.fetch_data
 
