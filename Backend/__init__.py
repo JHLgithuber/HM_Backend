@@ -29,7 +29,7 @@ class Connect_to_Frontend:
         #print(secrets.token_urlsafe(1024))
         # JWT 설정
         self.app.config['JWT_SECRET_KEY'] = secrets.token_urlsafe(1024) #서버 시작때마다 난수 시크릿키 생성
-        self.app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(minutes=15)
+        self.app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(minutes=30)
         self.app.config['JWT_REFRESH_TOKEN_EXPIRES'] = timedelta(days=30)
         self.jwt = JWTManager(self.app)
 
