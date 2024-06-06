@@ -20,7 +20,6 @@ class Connect_to_Frontend:
         load_dotenv()
         self.app = Flask(__name__)
         self.socketio = SocketIO(self.app)
-        self.showing_logs = []  # 로그를 저장할 리스트
 
         # 로깅 설정
         logging.basicConfig(level=logging.INFO)
@@ -29,7 +28,7 @@ class Connect_to_Frontend:
 
         #print(secrets.token_urlsafe(1024))
         # JWT 설정
-        self.app.config['JWT_SECRET_KEY'] = "secretkey"#secrets.token_urlsafe(1024) #서버 시작때마다 난수 시크릿키 생성
+        self.app.config['JWT_SECRET_KEY'] = secrets.token_urlsafe(1024) #서버 시작때마다 난수 시크릿키 생성
         self.app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(minutes=15)
         self.app.config['JWT_REFRESH_TOKEN_EXPIRES'] = timedelta(days=30)
         self.jwt = JWTManager(self.app)
@@ -56,9 +55,9 @@ class Connect_to_Frontend:
             return render_template('index.html')
 
         @self.app.route('/logs')
-        def showing_logs():
+        def show_logs():
             self.app.logger.info('로그 페이지에 접근됨')
-            return "Server Log:\n" + json.dumps(self.showing_logs, indent=4)
+            return render_template('show.html')
 
         @self.app.route('/login', methods=['POST'])
         def login():
@@ -162,6 +161,7 @@ class Connect_to_Frontend:
                 #print("\nresponse_data_from_result_entity_instance_list\t",response_data_from_result_entity_instance_list)
             except Exception as e:
                 self.app.logger.error(f"Error mgmt data in DB: {e}")
+                self.socketio.emit('error_data', f"Error mgmt data in DB: {e}", to=sid)
 
             log_entry = {
                 'SID': sid,
@@ -191,9 +191,8 @@ class Connect_to_Frontend:
                 "JSON_DATA": convert_dates(json_data)
             }, indent=4)
 
-            self.showing_logs.append(log_entry)  # 로그 저장
             self.socketio.emit('responsed_data', response_data_to_frontend, to=sid)
-            # self.socketio.emit('receive_message', log_entry)
+            #self.socketio.emit('receive_message', log_entry)
             self.app.logger.info(f"Sent message: {response_data_to_frontend} to {sid}")
 
 
@@ -206,7 +205,6 @@ class Connect_to_Frontend:
                 'from': user_id,
                 'JSON_DATA': message
             }
-            self.showing_logs.append(log_entry)  # 로그 저장
             self.socketio.emit('receive_message', message, to=client)
-            self.socketio.emit('receive_message', log_entry)
+            #self.socketio.emit('receive_message', log_entry)
             self.app.logger.info(f"Sent message: {message} to {client}")

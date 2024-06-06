@@ -247,10 +247,11 @@ class Mgmt:
             raise RuntimeError(f"Failed to read data: {e}")
 
     def standard_update_only_where(self):
+        self.server.app.logger.info("standard_update_only_where")
         try:
             self.fetch_data= (DB_class.Connect_to_DB(self.server)
                               .add_sql(f"UPDATE {self.entity} SET {self.data} WHERE {self.where};")
-                              .execute().fetch().fetch_data)
+                              .execute().fetch().commit().fetch_data)
         except Exception as e:
             self.server.app.logger.error(f"Error in standard_read_where: {e}")
             raise RuntimeError(f"Failed to read data with where clause: {e}")
