@@ -2,6 +2,7 @@
 from flask_jwt_extended import create_access_token, create_refresh_token, get_jwt_identity, jwt_required, get_jwt
 import Backend.DBconnect_class as DB_class
 import Backend.entity_class as entity_class
+import hashlib
 from dotenv import load_dotenv
 
 class login:
@@ -9,7 +10,8 @@ class login:
         self.server = server
 
         self.username = None
-        self.password = None
+        self.plain_password = None
+        self.hashed_password = None
         self.permission = None
         self.access_token = None
         self.refresh_token = None
@@ -19,12 +21,12 @@ class login:
     def compare_IDPW(self, username, password):
         # 회원정보 대조
         self.username = username
-        self.password = password
-        self.server.app.logger.info(f"username of instance: {self.username}, password of instance: {self.password}")
+        self.plain_password = password
+        self.server.app.logger.info(f"username of instance: {self.username}, password of instance: {self.plain_password}")
 
         try:
             self.result=entity_class.MembershipData.from_dict(DB_class.Connect_to_DB(self.server)
-                              .add_sql(f"SELECT PasswordHash,Authority FROM Membership_data WHERE ID = '{self.username}';")
+                              .add_sql(f"SELECT PasswordHash,Salt,Authority FROM Membership_data WHERE ID = '{self.username}';")
                               .execute().fetch().fetch_data[0])
 
         except Exception as e:
@@ -34,7 +36,7 @@ class login:
             self.server.app.logger.info(f"Maked login instance")
 
         if self.result:
-            if self.password==self.result.PasswordHash:
+            if self.hashing()==self.result.PasswordHash:
                self.permission=self.result.Authority
                self.make_token()
             else:
@@ -57,20 +59,9 @@ class login:
         self.refresh_token = create_refresh_token(identity=self.username, additional_claims={"permission": self.permission})
         self.server.app.logger.info(f"access_token: {self.access_token}, refresh_token: {self.refresh_token}")
         return self
-"""
-    @staticmethod
-    @jwt_required()
-    def protected(self, access_token):
-        self.access_token=access_token
-        self.username = get_jwt_identity() 
-        self.permission = get_jwt().get('permission', None)
-        self.server.app.logger.info(f"Protected access_token: {self.access_token}, permission: {self.permission}")
-        self.code = 200
-        return self
 
-    @jwt_required(refresh=True)
-    def refresh(self):
-        self.username = get_jwt_identity()
-        self.access_token = self.server.create_access_token(identity=self.username, additional_claims={"permission": self.permission})
-        return self
-"""
+
+    def hashing(self):
+        hashed_password = hashlib.sha512((self.result.Salt + self.plain_password + self.result.Salt).encode('utf-8')).hexdigest()
+        self.server.app.logger.info(f"hashed_password: {hashed_password}")
+        return hashed_password

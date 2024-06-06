@@ -121,6 +121,7 @@ class VehicleData(FunctionOfEntity):
 class MembershipData(FunctionOfEntity):
     ID: str  # ID (PK)
     PasswordHash: str  # PW (SHA-256)
+    Salt: str #Salt for Hashing
     ResidentId: Optional[str] = None  # 주민관리번호 (FK - ResidentData.ResidentId)
     Authority: Optional[str] = None  # 권한
     Note: Optional[str] = None  # 비고
