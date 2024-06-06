@@ -138,3 +138,6 @@ Key/
 
 HM_Backend_VSCode_workspace.code-workspace
 Sample_Client
+/Backend/templates/css/singlePageTemplate.css
+/Backend/templates/show2.html
+/Backend/templates/images/placeholder.jpg

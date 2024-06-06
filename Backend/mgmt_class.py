@@ -222,7 +222,7 @@ class Mgmt:
     def standard_create(self):
         try:
             self.fetch_data=(DB_class.Connect_to_DB(self.server).add_sql(f"INSERT INTO {self.entity} {self.property} VALUES {self.data};")
-                              .execute().fetch().fetch_data)
+                              .execute().commit())
         except Exception as e:
             self.server.app.logger.error(f"Error in standard_read_opt: {e}")
             raise RuntimeError(f"Failed to read data with options: {e}")
@@ -233,10 +233,10 @@ class Mgmt:
         try:
             if self.where is not None:
                 self.id_data_result = (DB_class.Connect_to_DB(self.server)
-                                  .add_sql(self.get_id_data_sql+f"AND {self.where}").execute().fetch().fetch_data)
+                                  .add_sql(self.get_id_data_sql+f"AND {self.where}").execute().commit())
             else:
                 self.id_data_result = (DB_class.Connect_to_DB(self.server)
-                                  .add_sql(self.get_id_data_sql).execute().fetch().fetch_data)
+                                  .add_sql(self.get_id_data_sql).execute().commit())
 
             if not self.id_data_result:
                 raise PermissionError(f"No records found for {self.where} for {self.id}")
@@ -251,7 +251,18 @@ class Mgmt:
         try:
             self.fetch_data= (DB_class.Connect_to_DB(self.server)
                               .add_sql(f"UPDATE {self.entity} SET {self.data} WHERE {self.where};")
-                              .execute().fetch().commit().fetch_data)
+                              .execute().commit())
+        except Exception as e:
+            self.server.app.logger.error(f"Error in standard_read_where: {e}")
+            raise RuntimeError(f"Failed to read data with where clause: {e}")
+        return self.fetch_data
+
+    def standard_update_only_where_recent(self):
+        self.server.app.logger.info("standard_update_only_where")
+        try:
+            self.fetch_data= (DB_class.Connect_to_DB(self.server)
+                              .add_sql(f"UPDATE {self.entity} SET {self.data} WHERE {self.where};")
+                              .execute().commit())
         except Exception as e:
             self.server.app.logger.error(f"Error in standard_read_where: {e}")
             raise RuntimeError(f"Failed to read data with where clause: {e}")
@@ -263,7 +274,7 @@ class Mgmt:
         try:
             self.fetch_data= (DB_class.Connect_to_DB(self.server)
                               .add_sql(f"DELETE FROM {self.entity} WHERE {self.where};")
-                              .execute().fetch().fetch_data)
+                              .execute().commit())
         except Exception as e:
             self.server.app.logger.error(f"Error in standard_read_where: {e}")
             raise RuntimeError(f"Failed to read data with where clause: {e}")

@@ -42,16 +42,18 @@ class Connect_to_DB:
             raise RuntimeError(f"Failed to execute SQL query: {e}")
         return self
 
-    def commit(self):
+    def commit(self): # INSERT,UPDATE,DELETE 적용 후 결과 가져옴
         try:
             self.wv_db_connection.commit()
             self.inserted_id = self.cursor.lastrowid
             self.row_count = self.cursor.rowcount
             self.server.app.logger.info(f"SQL 커밋됨\tinserted_id: {self.inserted_id}\trow_count: {self.row_count}\n SQL: {self.sql}")
+            return [{"result":"success"}]
         except pymysql.MySQLError as e:
             self.server.app.logger.error(f"SQL 커밋 오류: {e}")
             raise RuntimeError(f"Failed to commit SQL query: {e}")
-        return self
+
+
 
     def fetch(self):  # SELECT할때 결과 가져옴
         try:
