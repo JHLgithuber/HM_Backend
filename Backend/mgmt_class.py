@@ -175,6 +175,7 @@ class Mgmt:
                     self.entity_class_type.from_dict(result_item_in_list))
 
     def standard_read_personal(self):  # FK와 연동해서 자기 데이터 맞는지 검증 필요
+        self.server.app.logger.info("standard_read_personal")
         try:
             if self.where is not None:
                 self.id_data_result = (DB_class.Connect_to_DB(self.server)
@@ -192,6 +193,7 @@ class Mgmt:
             raise RuntimeError(f"Failed to read data: {e}")
 
     def standard_read_all(self):
+        self.server.app.logger.info("standard_read_all")
         try:
             self.fetch_data = (DB_class.Connect_to_DB(self.server).add_sql(f"SELECT {self.property} FROM {self.entity};")
                               .execute().fetch().fetch_data)
@@ -202,6 +204,7 @@ class Mgmt:
         return self.fetch_data
 
     def standard_read_where (self):
+        self.server.app.logger.info("standard_read_where")
         try:
             self.fetch_data= (DB_class.Connect_to_DB(self.server).add_sql(f"SELECT {self.property} FROM {self.entity} WHERE {self.where};")
                               .execute().fetch().fetch_data)
@@ -211,6 +214,7 @@ class Mgmt:
         return self.fetch_data
 
     def standard_read_opt(self): # 특수 옵션 적용
+        self.server.app.logger.info("standard_read_opt")
         try:
             self.fetch_data=(DB_class.Connect_to_DB(self.server).add_sql(f"SELECT {self.property} FROM {self.entity} WHERE {self.where};")
                               .execute().fetch().fetch_data)
@@ -220,6 +224,7 @@ class Mgmt:
         return self.fetch_data
 
     def standard_create(self):
+        self.server.app.logger.info("standard_create")
         try:
             self.fetch_data=(DB_class.Connect_to_DB(self.server).add_sql(f"INSERT INTO {self.entity} {self.property} VALUES {self.data};")
                               .execute().commit())
@@ -230,6 +235,7 @@ class Mgmt:
 
 
     def standard_update_personal(self): #수정필요
+        self.server.app.logger.info("standard_update_personal")
         try:
             if self.where is not None:
                 self.id_data_result = (DB_class.Connect_to_DB(self.server)
@@ -258,7 +264,7 @@ class Mgmt:
         return self.fetch_data
 
     def standard_update_only_where_recent(self):
-        self.server.app.logger.info("standard_update_only_where")
+        self.server.app.logger.info("standard_update_only_where_recent")
         try:
             self.fetch_data= (DB_class.Connect_to_DB(self.server)
                               .add_sql(f"UPDATE {self.entity} SET {self.data} WHERE {self.where};")
@@ -271,6 +277,7 @@ class Mgmt:
 
 
     def standard_delete(self):
+        self.server.app.logger.info("standard_delete")
         try:
             self.fetch_data= (DB_class.Connect_to_DB(self.server)
                               .add_sql(f"DELETE FROM {self.entity} WHERE {self.where};")
